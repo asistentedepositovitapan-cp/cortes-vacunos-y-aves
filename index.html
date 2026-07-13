@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Control de Productos Cárnicos y Pollos</title>
+<meta name="theme-color" content="#7A2E2E">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#241B17;
+    --paper:#FAF7F2;
+    --paper-dim:#EFEAE1;
+    --burgundy:#7A2E2E;
+    --burgundy-dark:#5E2222;
+    --mustard:#C99A3C;
+    --mustard-dark:#A17B27;
+    --line:#DCD3C4;
+    --muted:#8A7F73;
+    --good:#3E7A52;
+    --bad:#B24C3A;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  html,body{
+    background:var(--ink);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .shell{
+    max-width:560px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--paper);
+    display:flex;
+    flex-direction:column;
+  }
+  header.top{
+    background:var(--ink);
+    color:var(--paper);
+    padding:22px 20px 18px;
+    position:relative;
+  }
+  header.top .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--mustard);
+    margin:0 0 4px;
+  }
+  header.top h1{
+    font-family:'Bitter',serif;
+    font-weight:800;
+    font-size:22px;
+    line-height:1.15;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  nav.tabs{
+    display:flex;
+    background:var(--ink);
+    padding:0 20px;
+    gap:6px;
+  }
+  nav.tabs button{
+    flex:1;
+    border:none;
+    padding:12px 10px 14px;
+    font-family:'Bitter',serif;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    border-radius:10px 10px 0 0;
+    background:rgba(250,247,242,0.06);
+    color:rgba(250,247,242,0.55);
+    transition:background .15s, color .15s;
+  }
+  nav.tabs button.active.vacuno{ background:var(--paper); color:var(--burgundy); }
+  nav.tabs button.active.pollo{ background:var(--paper); color:var(--mustard-dark); }
+
+  main{ flex:1; padding:18px 18px 100px; }
+
+  .scale-panel{
+    background:var(--ink);
+    border-radius:14px;
+    padding:18px 18px 16px;
+    color:var(--paper);
+    position:relative;
+    overflow:hidden;
+  }
+  .scale-panel::before{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(135deg, rgba(122,46,46,0.35), rgba(201,154,60,0.12));
+    pointer-events:none;
+  }
+  .scale-panel.pollo::before{
+    background:linear-gradient(135deg, rgba(201,154,60,0.35), rgba(122,46,46,0.10));
+  }
+  .scale-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:rgba(250,247,242,0.55);
+    margin:0 0 6px;
+  }
+  .scale-readout{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+    font-size:44px;
+    line-height:1;
+    color:var(--mustard);
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .vacuno .scale-readout{ color:#E3A6A6; }
+  .scale-readout small{ font-size:16px; font-weight:600; color:rgba(250,247,242,0.6);}
+  .scale-sub{
+    display:flex;
+    gap:18px;
+    margin-top:12px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:rgba(250,247,242,0.7);
+  }
+  .scale-sub b{ color:var(--paper); font-weight:600;}
+
+  .actions-row{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+  }
+  .btn{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:13px 10px;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .btn-entrada{ background:var(--good); color:#fff; }
+  .btn-salida{ background:var(--burgundy); color:#fff; }
+  .tabpanel.pollo .btn-salida{ background:var(--mustard-dark); }
+  .btn-reporte{ background:rgba(250,247,242,0.12); color:var(--paper); border:1px solid rgba(250,247,242,0.25); }
+  .btn:active{ transform:scale(0.98); }
+
+  .section-title{
+    font-family:'Bitter',serif;
+    font-weight:700;
+    font-size:15px;
+    margin:26px 0 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .section-title .link-btn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    color:var(--burgundy);
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+  }
+  .tabpanel.pollo .section-title .link-btn{ color:var(--mustard-dark); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+    padding:6px 10px;
+    border-radius:100px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .chip button{
+    border:none; background:none; cursor:pointer;
+    color:var(--muted); font-size:13px; line-height:1; padding:0;
+  }
+
+  .ticket{
+    background:var(--paper);
+    border:1px dashed var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    position:relative;
+  }
+  .ticket .row1{ display:flex; justify-content:space-between; align-items:baseline; }
+  .ticket .tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    padding:2px 7px;
+    border-radius:4px;
+    font-weight:700;
+  }
+  .tag.entrada{ background:rgba(62,122,82,0.15); color:var(--good); }
+  .tag.salida{ background:rgba(122,46,46,0.12); color:var(--burgundy); }
+  .tabpanel.pollo .tag.salida{ background:rgba(201,154,60,0.18); color:var(--mustard-dark); }
+  .ticket .kg{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+    font-size:17px;
+  }
+  .ticket .meta{
+    margin-top:4px;
+    font-size:12.5px;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .ticket .corte-name{ font-weight:600; color:var(--ink); }
+  .ticket .del{
+    border:none; background:none; color:var(--muted); font-size:12px;
+    cursor:pointer; text-decoration:underline; padding:0;
+  }
+  .empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    padding:26px 10px;
+    border:1px dashed var(--line);
+    border-radius:10px;
+  }
+
+  /* modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(36,27,23,0.55);
+    display:none; align-items:flex-end; justify-content:center; z-index:50;
+  }
+  .overlay.show{ display:flex; }
+  .modal{
+    background:var(--paper);
+    width:100%; max-width:560px;
+    border-radius:18px 18px 0 0;
+    padding:20px 20px 26px;
+    animation:slideup .18s ease-out;
+  }
+  @keyframes slideup{ from{ transform:translateY(30px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+  .modal h2{
+    font-family:'Bitter',serif;
+    font-size:18px;
+    margin:0 0 14px;
+  }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:11px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:2px solid var(--burgundy);
+    outline-offset:1px;
+  }
+  .modal-actions{ display:flex; gap:10px; margin-top:6px; }
+  .modal-actions .btn-secondary{
+    flex:1; background:var(--paper-dim); color:var(--ink);
+    border:1px solid var(--line); border-radius:10px; padding:13px; font-weight:700; cursor:pointer;
+  }
+  .modal-actions .btn-primary{
+    flex:1.4; border:none; border-radius:10px; padding:13px; font-weight:700; color:#fff; cursor:pointer;
+    background:var(--burgundy);
+  }
+  .add-corte-inline{ display:flex; gap:8px; margin-top:8px; }
+  .add-corte-inline input{ flex:1; }
+  .add-corte-inline button{
+    border:none; border-radius:8px; padding:0 14px; font-weight:700; color:#fff; background:var(--ink); cursor:pointer;
+  }
+
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+    background:var(--ink); color:var(--paper); padding:11px 18px; border-radius:100px;
+    font-size:13px; font-weight:600; z-index:99; opacity:0; pointer-events:none;
+    transition:opacity .2s;
+  }
+  .toast.show{ opacity:1; }
+
+  .config-banner{
+    background:#3A2A20; color:#F4D8A8; font-family:'IBM Plex Mono',monospace;
+    font-size:12px; padding:10px 16px; text-align:center; display:none;
+  }
+  .config-banner.show{ display:block; }
+
+  ::-webkit-scrollbar{ width:0; height:0; }
+</style>
+</head>
+<body>
+
+<div class="config-banner" id="configBanner">
+  ⚠ Falta configurar Firebase — editá firebaseConfig en index.html
+</div>
+
+<div class="shell">
+  <header class="top">
+    <p class="eyebrow">Depósito · Control de mercadería</p>
+    <h1>Control de Productos<br>Cárnicos y Pollos</h1>
+  </header>
+
+  <nav class="tabs">
+    <button class="active vacuno" data-tab="vacuno" onclick="setTab('vacuno')">🥩 Vacuno</button>
+    <button class="pollo" data-tab="pollo" onclick="setTab('pollo')">🍗 Pollo</button>
+  </nav>
+
+  <main id="main">
+    <!-- rendered by JS -->
+  </main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase (compat SDK, vanilla JS) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- jsPDF (generación de reportes en PDF) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+/* =========================================================
+   1) CONFIGURACIÓN DE FIREBASE
+   Reemplazá estos valores por los de tu proyecto Firebase
+   (Firebase console → Configuración del proyecto → Tus apps → SDK setup).
+   Recordá también crear un proyecto nuevo o reutilizar uno existente,
+   habilitar Firestore, y abrir las reglas para lectura/escritura
+   (o protegerlas según tu criterio).
+========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCUEQMqmakCs6zGMbmsXD2ioFMW5djB08U",
+  authDomain: "cortes-vacunos-aves.firebaseapp.com",
+  projectId: "cortes-vacunos-aves",
+  storageBucket: "cortes-vacunos-aves.firebasestorage.app",
+  messagingSenderId: "488269451516",
+  appId: "1:488269451516:web:81f33cfa808f2772370779"
+};
+
+const isConfigured = firebaseConfig.apiKey !== "TU_API_KEY";
+if (!isConfigured) {
+  document.getElementById('configBanner').classList.add('show');
+}
+
+let db = null;
+if (isConfigured) {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+}
+
+/* =========================================================
+   2) ESTADO
+========================================================= */
+const DEFAULT_CORTES = {
+  vacuno: ["Corte para Milanesa", "Corte para Sandwich"],
+  pollo: ["Corte para Milanesa", "Corte para Sandwich", "Corte para Grille"]
+};
+
+const DEFAULT_DESTINOS = ["Producción", "San Lorenzo", "Laureles", "Gran Santos"];
+
+let state = {
+  tab: 'vacuno',
+  cortes: { vacuno: [], pollo: [] },
+  destinos: [],
+  movimientos: { vacuno: [], pollo: [] },
+  cortesLoaded: false
+};
+
+/* =========================================================
+   3) FIRESTORE: listeners en tiempo real
+========================================================= */
+function initFirestore(){
+  if (!db) { renderAll(); return; }
+
+  // cortes (config/cortes doc con arrays por producto)
+  db.collection('config').doc('cortes').onSnapshot(async (doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      state.cortes.vacuno = data.vacuno || [];
+      state.cortes.pollo = data.pollo || [];
+    } else {
+      // primera vez: crear con valores por defecto
+      await db.collection('config').doc('cortes').set(DEFAULT_CORTES);
+      state.cortes = { ...DEFAULT_CORTES };
+    }
+    state.cortesLoaded = true;
+    renderAll();
+  }, (err) => { console.error(err); showToast('Error al leer cortes: ' + err.message); });
+
+  // destinos (config/destinos doc con lista compartida entre vacuno y pollo)
+  db.collection('config').doc('destinos').onSnapshot(async (doc) => {
+    if (doc.exists) {
+      state.destinos = doc.data().lista || [];
+    } else {
+      await db.collection('config').doc('destinos').set({ lista: DEFAULT_DESTINOS });
+      state.destinos = [...DEFAULT_DESTINOS];
+    }
+    renderAll();
+  }, (err) => { console.error(err); showToast('Error al leer destinos: ' + err.message); });
+
+  // movimientos
+  db.collection('movimientos').orderBy('timestamp', 'desc').onSnapshot((snap) => {
+    const vacuno = [], pollo = [];
+    snap.forEach((doc) => {
+      const m = { id: doc.id, ...doc.data() };
+      if (m.producto === 'vacuno') vacuno.push(m);
+      else if (m.producto === 'pollo') pollo.push(m);
+    });
+    state.movimientos.vacuno = vacuno;
+    state.movimientos.pollo = pollo;
+    renderAll();
+  }, (err) => { console.error(err); showToast('Error al leer movimientos: ' + err.message); });
+}
+
+/* =========================================================
+   4) LÓGICA
+========================================================= */
+function computeStock(producto){
+  const movs = state.movimientos[producto] || [];
+  let entradas = 0, salidas = 0;
+  movs.forEach(m => {
+    const kg = Number(m.kg) || 0;
+    if (m.tipo === 'entrada') entradas += kg;
+    else salidas += kg;
+  });
+  return { stock: entradas - salidas, entradas, salidas };
+}
+
+function fmt(n){
+  return (Math.round(n * 100) / 100).toLocaleString('es-PY', { minimumFractionDigits: n % 1 === 0 ? 0 : 2 });
+}
+
+function fechaHoy(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+function fechaBonita(iso){
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function tsMillis(m){
+  if (m.timestamp && typeof m.timestamp.toDate === 'function') return m.timestamp.toDate().getTime();
+  if (m.fecha) return new Date(m.fecha + 'T00:00:00').getTime();
+  return 0;
+}
+
+/* =========================================================
+   5) RENDER
+========================================================= */
+function setTab(tab){
+  state.tab = tab;
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  renderAll();
+}
+
+function renderAll(){
+  const producto = state.tab;
+  const label = producto === 'vacuno' ? 'Vacuno' : 'Pollo';
+  const { stock, entradas, salidas } = computeStock(producto);
+  const cortes = state.cortes[producto] || [];
+  const movs = state.movimientos[producto] || [];
+
+  const main = document.getElementById('main');
+  main.innerHTML = `
+    <div class="tabpanel ${producto}">
+      <div class="scale-panel ${producto}">
+        <p class="scale-label">Stock disponible · ${label}</p>
+        <div class="scale-readout">${fmt(stock)}<small>kg</small></div>
+        <div class="scale-sub">
+          <span>Recibido: <b>${fmt(entradas)} kg</b></span>
+          <span>Usado: <b>${fmt(salidas)} kg</b></span>
+        </div>
+        <div class="actions-row">
+          <button class="btn btn-entrada" onclick="openEntradaModal()">＋ Cargar recepción</button>
+          <button class="btn btn-salida" onclick="openSalidaModal()">－ Registrar corte</button>
+        </div>
+        <div class="actions-row" style="margin-top:8px;">
+          <button class="btn btn-reporte" onclick="openReporteModal()">📄 Generar reporte PDF</button>
+        </div>
+      </div>
+
+      <div class="section-title">
+        Cortes de ${label.toLowerCase()}
+        <button class="link-btn" onclick="openManageCortesModal()">Administrar</button>
+      </div>
+      <div class="chips">
+        ${cortes.length ? cortes.map(c => `<span class="chip">${escapeHtml(c)}</span>`).join('') : '<span style="font-size:13px;color:var(--muted)">Sin cortes cargados todavía.</span>'}
+      </div>
+
+      <div class="section-title">
+        Destinos de despacho
+        <button class="link-btn" onclick="openManageDestinosModal()">Administrar</button>
+      </div>
+      <div class="chips">
+        ${state.destinos.length ? state.destinos.map(d => `<span class="chip">${escapeHtml(d)}</span>`).join('') : '<span style="font-size:13px;color:var(--muted)">Sin destinos cargados todavía.</span>'}
+      </div>
+
+      <div class="section-title">Historial de movimientos</div>
+      ${movs.length ? movs.map(renderTicket).join('') : '<div class="empty">Todavía no hay movimientos cargados para ' + label.toLowerCase() + '.</div>'}
+    </div>
+  `;
+}
+
+function renderTicket(m){
+  const isEntrada = m.tipo === 'entrada';
+  const destinoLine = (!isEntrada && m.destino) ? ` · <span style="color:var(--muted)">${escapeHtml(m.destino)}</span>` : '';
+  return `
+    <div class="ticket">
+      <div class="row1">
+        <span class="tag ${m.tipo}">${isEntrada ? 'Recepción' : 'Salida'}</span>
+        <span class="kg">${isEntrada ? '+' : '−'}${fmt(m.kg)} kg</span>
+      </div>
+      <div class="meta">
+        <span>${isEntrada ? (m.nota ? escapeHtml(m.nota) : 'Ingreso de mercadería') : `<span class="corte-name">${escapeHtml(m.corte || 'Corte')}</span>${destinoLine}${m.nota ? ' · ' + escapeHtml(m.nota) : ''}`}</span>
+      </div>
+      <div class="meta">
+        <span>${fechaBonita(m.fecha)}</span>
+        <button class="del" onclick="deleteMovimiento('${m.id}')">Eliminar</button>
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* =========================================================
+   6) MODALES
+========================================================= */
+function showModal(html){
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('overlay').classList.remove('show');
+}
+document.getElementById('overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'overlay') closeModal();
+});
+
+function openEntradaModal(){
+  const producto = state.tab;
+  const label = producto === 'vacuno' ? 'vacuno' : 'pollo';
+  showModal(`
+    <h2>Cargar recepción · ${label}</h2>
+    <div class="field">
+      <label>Kilos recibidos</label>
+      <input type="number" id="fEntradaKg" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 85.5" autofocus>
+    </div>
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="fEntradaFecha" value="${fechaHoy()}">
+    </div>
+    <div class="field">
+      <label>Nota (proveedor, guía, etc.) — opcional</label>
+      <input type="text" id="fEntradaNota" placeholder="Ej: Proveedor Frigorífico X, remito 1234">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" style="background:var(--good)" onclick="guardarEntrada()">Guardar recepción</button>
+    </div>
+  `);
+}
+
+async function guardarEntrada(){
+  const kg = parseFloat(document.getElementById('fEntradaKg').value);
+  const fecha = document.getElementById('fEntradaFecha').value || fechaHoy();
+  const nota = document.getElementById('fEntradaNota').value.trim();
+  if (!kg || kg <= 0){ showToast('Ingresá un valor de kg válido'); return; }
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('movimientos').add({
+      producto: state.tab,
+      tipo: 'entrada',
+      corte: null,
+      kg,
+      fecha,
+      nota,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal();
+    showToast('Recepción cargada');
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+function openSalidaModal(){
+  const producto = state.tab;
+  const label = producto === 'vacuno' ? 'vacuno' : 'pollo';
+  const cortes = state.cortes[producto] || [];
+  const options = cortes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  const destinoOptions = state.destinos.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+  showModal(`
+    <h2>Registrar corte · ${label}</h2>
+    <div class="field">
+      <label>Tipo de corte</label>
+      <select id="fSalidaCorte">
+        ${options || '<option value="">Sin cortes cargados</option>'}
+      </select>
+    </div>
+    <div class="field">
+      <label>Destino</label>
+      <select id="fSalidaDestino">
+        ${destinoOptions || '<option value="">Sin destinos cargados</option>'}
+      </select>
+    </div>
+    <div class="field">
+      <label>Kilos utilizados</label>
+      <input type="number" id="fSalidaKg" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 4.2" autofocus>
+    </div>
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="fSalidaFecha" value="${fechaHoy()}">
+    </div>
+    <div class="field">
+      <label>Nota — opcional</label>
+      <input type="text" id="fSalidaNota" placeholder="Ej: Pedido especial">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarSalida()">Guardar salida</button>
+    </div>
+  `);
+}
+
+async function guardarSalida(){
+  const corte = document.getElementById('fSalidaCorte').value;
+  const destino = document.getElementById('fSalidaDestino').value;
+  const kg = parseFloat(document.getElementById('fSalidaKg').value);
+  const fecha = document.getElementById('fSalidaFecha').value || fechaHoy();
+  const nota = document.getElementById('fSalidaNota').value.trim();
+  if (!corte){ showToast('Elegí un tipo de corte'); return; }
+  if (!destino){ showToast('Elegí un destino'); return; }
+  if (!kg || kg <= 0){ showToast('Ingresá un valor de kg válido'); return; }
+  const { stock } = computeStock(state.tab);
+  if (kg > stock + 0.001){
+    if (!confirm(`Esto deja el stock en negativo (disponible: ${fmt(stock)} kg). ¿Confirmás igual?`)) return;
+  }
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('movimientos').add({
+      producto: state.tab,
+      tipo: 'salida',
+      corte,
+      destino,
+      kg,
+      fecha,
+      nota,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal();
+    showToast('Corte registrado');
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+function openManageCortesModal(){
+  const producto = state.tab;
+  const label = producto === 'vacuno' ? 'vacuno' : 'pollo';
+  const cortes = state.cortes[producto] || [];
+  showModal(`
+    <h2>Administrar cortes · ${label}</h2>
+    <div class="chips" id="manageChips">
+      ${cortes.map(c => `<span class="chip">${escapeHtml(c)} <button onclick="eliminarCorte('${escapeAttr(c)}')">✕</button></span>`).join('') || '<span style="font-size:13px;color:var(--muted)">Sin cortes todavía.</span>'}
+    </div>
+    <div class="add-corte-inline">
+      <input type="text" id="fNuevoCorte" placeholder="Ej: Corte para Milanesa">
+      <button onclick="agregarCorte()">Agregar</button>
+    </div>
+    <div class="modal-actions" style="margin-top:18px;">
+      <button class="btn-secondary" style="flex:1" onclick="closeModal()">Listo</button>
+    </div>
+  `);
+}
+
+function escapeAttr(s){
+  return String(s).replace(/'/g, "\\'");
+}
+
+async function agregarCorte(){
+  const input = document.getElementById('fNuevoCorte');
+  const nombre = input.value.trim();
+  if (!nombre) return;
+  const producto = state.tab;
+  const actuales = state.cortes[producto] || [];
+  if (actuales.includes(nombre)){ showToast('Ese corte ya existe'); return; }
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('config').doc('cortes').set({
+      [producto]: [...actuales, nombre]
+    }, { merge: true });
+    input.value = '';
+    setTimeout(openManageCortesModal, 150);
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+async function eliminarCorte(nombre){
+  const producto = state.tab;
+  const actuales = state.cortes[producto] || [];
+  if (!confirm(`¿Eliminar el corte "${nombre}"? (no borra los movimientos ya cargados)`)) return;
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('config').doc('cortes').set({
+      [producto]: actuales.filter(c => c !== nombre)
+    }, { merge: true });
+    setTimeout(openManageCortesModal, 150);
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+function openManageDestinosModal(){
+  const destinos = state.destinos || [];
+  showModal(`
+    <h2>Administrar destinos de despacho</h2>
+    <div class="chips" id="manageChipsDestinos">
+      ${destinos.map(d => `<span class="chip">${escapeHtml(d)} <button onclick="eliminarDestino('${escapeAttr(d)}')">✕</button></span>`).join('') || '<span style="font-size:13px;color:var(--muted)">Sin destinos todavía.</span>'}
+    </div>
+    <div class="add-corte-inline">
+      <input type="text" id="fNuevoDestino" placeholder="Ej: Sucursal Encarnación">
+      <button onclick="agregarDestino()">Agregar</button>
+    </div>
+    <div class="modal-actions" style="margin-top:18px;">
+      <button class="btn-secondary" style="flex:1" onclick="closeModal()">Listo</button>
+    </div>
+  `);
+}
+
+async function agregarDestino(){
+  const input = document.getElementById('fNuevoDestino');
+  const nombre = input.value.trim();
+  if (!nombre) return;
+  const actuales = state.destinos || [];
+  if (actuales.includes(nombre)){ showToast('Ese destino ya existe'); return; }
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('config').doc('destinos').set({ lista: [...actuales, nombre] }, { merge: true });
+    input.value = '';
+    setTimeout(openManageDestinosModal, 150);
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+async function eliminarDestino(nombre){
+  const actuales = state.destinos || [];
+  if (!confirm(`¿Eliminar el destino "${nombre}"? (no borra los movimientos ya cargados)`)) return;
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('config').doc('destinos').set({ lista: actuales.filter(d => d !== nombre) }, { merge: true });
+    setTimeout(openManageDestinosModal, 150);
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+async function deleteMovimiento(id){
+  if (!confirm('¿Eliminar este movimiento?')) return;
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('movimientos').doc(id).delete();
+    showToast('Movimiento eliminado');
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+/* =========================================================
+   6b) REPORTES EN PDF
+========================================================= */
+let reporteModo = 'recepcion'; // 'recepcion' | 'rango'
+
+function openReporteModal(){
+  reporteModo = 'recepcion';
+  renderReporteModal();
+}
+
+function renderReporteModal(){
+  const producto = state.tab;
+  const label = producto === 'vacuno' ? 'Vacuno' : 'Pollo';
+  const entradas = (state.movimientos[producto] || []).filter(m => m.tipo === 'entrada');
+
+  const entradaOptions = entradas.map(e =>
+    `<option value="${e.id}">${fechaBonita(e.fecha)} · ${fmt(e.kg)} kg${e.nota ? ' — ' + escapeHtml(e.nota) : ''}</option>`
+  ).join('');
+
+  showModal(`
+    <h2>Generar reporte PDF · ${label}</h2>
+    <div class="modal-actions" style="margin-bottom:16px;">
+      <button class="btn-secondary" style="${reporteModo === 'recepcion' ? 'outline:2px solid var(--burgundy)' : ''}" onclick="reporteModo='recepcion'; renderReporteModal();">Por recepción</button>
+      <button class="btn-secondary" style="${reporteModo === 'rango' ? 'outline:2px solid var(--burgundy)' : ''}" onclick="reporteModo='rango'; renderReporteModal();">Por rango de fechas</button>
+    </div>
+
+    ${reporteModo === 'recepcion' ? `
+      <div class="field">
+        <label>Elegí la recepción (compra)</label>
+        <select id="fReporteEntrada">
+          ${entradaOptions || '<option value="">No hay recepciones cargadas</option>'}
+        </select>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:-4px;">
+        El reporte suma todos los cortes registrados desde esa recepción hasta la siguiente recepción (o hasta hoy, si es la última).
+      </p>
+    ` : `
+      <div class="field">
+        <label>Desde</label>
+        <input type="date" id="fReporteDesde" value="${fechaHoy()}">
+      </div>
+      <div class="field">
+        <label>Hasta</label>
+        <input type="date" id="fReporteHasta" value="${fechaHoy()}">
+      </div>
+    `}
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="generarReportePDF()">Generar PDF</button>
+    </div>
+  `);
+}
+
+function generarReportePDF(){
+  const producto = state.tab;
+  const label = producto === 'vacuno' ? 'Vacuno' : 'Pollo';
+  const movs = state.movimientos[producto] || [];
+
+  let entradaRef = null;
+  let windowStart, windowEnd, periodoLabel;
+
+  if (reporteModo === 'recepcion'){
+    const id = document.getElementById('fReporteEntrada').value;
+    if (!id){ showToast('Elegí una recepción'); return; }
+    entradaRef = movs.find(m => m.id === id);
+    if (!entradaRef){ showToast('No se encontró la recepción'); return; }
+
+    const entradasOrdenadas = movs.filter(m => m.tipo === 'entrada').sort((a,b) => tsMillis(a) - tsMillis(b));
+    const start = tsMillis(entradaRef);
+    const siguiente = entradasOrdenadas.find(e => tsMillis(e) > start);
+    windowStart = start;
+    windowEnd = siguiente ? tsMillis(siguiente) : Date.now() + 1;
+    periodoLabel = `${fechaBonita(entradaRef.fecha)} — ${siguiente ? fechaBonita(siguiente.fecha) : 'hoy'}`;
+  } else {
+    const desde = document.getElementById('fReporteDesde').value;
+    const hasta = document.getElementById('fReporteHasta').value;
+    if (!desde || !hasta){ showToast('Completá ambas fechas'); return; }
+    windowStart = new Date(desde + 'T00:00:00').getTime();
+    windowEnd = new Date(hasta + 'T23:59:59').getTime();
+    periodoLabel = `${fechaBonita(desde)} — ${fechaBonita(hasta)}`;
+  }
+
+  const salidasEnVentana = movs.filter(m => m.tipo === 'salida' && tsMillis(m) >= windowStart && tsMillis(m) < windowEnd);
+  const entradasEnVentana = movs.filter(m => m.tipo === 'entrada' && tsMillis(m) >= windowStart && tsMillis(m) < windowEnd);
+
+  if (!salidasEnVentana.length && !entradaRef && !entradasEnVentana.length){
+    showToast('No hay movimientos en ese período');
+    return;
+  }
+
+  // Totales por corte
+  const porCorte = {};
+  // Detalle por corte + destino
+  const porCorteDestino = {};
+  salidasEnVentana.forEach(m => {
+    const c = m.corte || 'Sin especificar';
+    const d = m.destino || 'Sin especificar';
+    porCorte[c] = (porCorte[c] || 0) + Number(m.kg || 0);
+    const key = c + '||' + d;
+    porCorteDestino[key] = (porCorteDestino[key] || 0) + Number(m.kg || 0);
+  });
+
+  const totalUsado = salidasEnVentana.reduce((s,m) => s + Number(m.kg || 0), 0);
+  const kgInicial = entradaRef ? Number(entradaRef.kg || 0) : entradasEnVentana.reduce((s,m) => s + Number(m.kg||0), 0);
+  const kgRestante = kgInicial - totalUsado;
+
+  buildPDF({
+    label, entradaRef, periodoLabel, kgInicial, totalUsado, kgRestante,
+    porCorte, porCorteDestino, salidasEnVentana
+  });
+}
+
+function buildPDF(data){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const { label, entradaRef, periodoLabel, kgInicial, totalUsado, kgRestante, porCorte, porCorteDestino } = data;
+
+  const burgundy = [122, 46, 46];
+  const mustard = [201, 154, 60];
+  const ink = [36, 27, 23];
+  const accent = label === 'Vacuno' ? burgundy : mustard;
+
+  // Encabezado
+  doc.setFillColor(...ink);
+  doc.rect(0, 0, 210, 28, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(15);
+  doc.text('Control de Productos Cárnicos y Pollos', 14, 13);
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text(`Reporte de consumo · ${label}`, 14, 20);
+
+  doc.setTextColor(...ink);
+  let y = 38;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('Datos del reporte', 14, y);
+  y += 7;
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(10);
+
+  const lineas = [];
+  if (entradaRef){
+    lineas.push(`Recepción de referencia: ${fechaBonita(entradaRef.fecha)} — ${fmt(entradaRef.kg)} kg${entradaRef.nota ? ' (' + entradaRef.nota + ')' : ''}`);
+  }
+  lineas.push(`Período considerado: ${periodoLabel}`);
+  lineas.push(`Kg inicial: ${fmt(kgInicial)} kg`);
+  lineas.push(`Kg total usado en cortes: ${fmt(totalUsado)} kg`);
+  lineas.push(`Kg restante estimado: ${fmt(kgRestante)} kg`);
+  lineas.push(`Emitido el: ${new Date().toLocaleString('es-PY')}`);
+
+  lineas.forEach(l => { doc.text(l, 14, y); y += 6; });
+  y += 4;
+
+  // Tabla: totales por corte
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('Kilos finales por corte', 14, y);
+  y += 3;
+
+  const corteRows = Object.entries(porCorte).map(([corte, kg]) => [corte, fmt(kg) + ' kg']);
+  doc.autoTable({
+    startY: y + 3,
+    head: [['Corte', 'Kg total']],
+    body: corteRows.length ? corteRows : [['Sin cortes registrados en el período', '-']],
+    headStyles: { fillColor: accent, textColor: 255 },
+    styles: { fontSize: 10 },
+    margin: { left: 14, right: 14 }
+  });
+
+  // Tabla: detalle por corte + destino
+  let y2 = doc.lastAutoTable.finalY + 10;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('Detalle por corte y destino', 14, y2);
+
+  const detalleRows = Object.entries(porCorteDestino).map(([key, kg]) => {
+    const [corte, destino] = key.split('||');
+    return [corte, destino, fmt(kg) + ' kg'];
+  });
+
+  doc.autoTable({
+    startY: y2 + 3,
+    head: [['Corte', 'Destino', 'Kg']],
+    body: detalleRows.length ? detalleRows : [['-', '-', '-']],
+    headStyles: { fillColor: ink, textColor: 255 },
+    styles: { fontSize: 9.5 },
+    margin: { left: 14, right: 14 }
+  });
+
+  const finalY = doc.lastAutoTable.finalY + 12;
+  doc.setFontSize(8.5);
+  doc.setTextColor(140,130,120);
+  doc.text('Documento generado automáticamente por la app de Control de Productos Cárnicos y Pollos — VitaPan.', 14, finalY);
+
+  const fechaArchivo = fechaHoy();
+  doc.save(`reporte-${data.label.toLowerCase()}-${fechaArchivo}.pdf`);
+  closeModal();
+  showToast('Reporte generado');
+}
+
+/* =========================================================
+   7) TOAST
+========================================================= */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* =========================================================
+   8) PWA: registrar service worker
+========================================================= */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(console.error);
+  });
+}
+
+/* =========================================================
+   9) INIT
+========================================================= */
+initFirestore();
+renderAll();
+</script>
+</body>
+</html>
