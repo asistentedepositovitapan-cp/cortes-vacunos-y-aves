@@ -1492,7 +1492,7 @@ function renderReporteModal(){
         </select>
       </div>
       <p style="font-size:12.5px;color:var(--muted);margin-top:-4px;">
-        Muestra los cortes que se obtuvieron exactamente de esa recepción.
+        Muestra los cortes obtenidos de esa recepción y también los envíos a sucursales (por destino y corte) mientras esa recepción estuvo en curso.
       </p>
     ` : `
       <div class="field">
@@ -1529,6 +1529,21 @@ function generarReportePDF(){
     }));
     const totalDespiezado = Object.values(porCorte).reduce((s,v) => s+v, 0);
 
+    // Ventana de tiempo: desde esta recepción hasta la siguiente (o hasta ahora), para
+    // relacionar qué remitos a sucursales salieron mientras esta recepción estaba en curso.
+    const recepcionesOrdenadas = (state.recepciones[producto] || []).slice().sort((a,b) => tsMillis(a) - tsMillis(b));
+    const start = tsMillis(recepcion);
+    const siguiente = recepcionesOrdenadas.find(r => tsMillis(r) > start);
+    const end = siguiente ? tsMillis(siguiente) : Date.now() + 1;
+
+    const remitosVentana = (state.remitos[producto] || []).filter(r => tsMillis(r) >= start && tsMillis(r) < end);
+    const porDestino = {};
+    remitosVentana.forEach(r => (r.cortes || []).forEach(c => {
+      const key = r.destino + '||' + c.corte + (c.pool === 'condimentado' ? ' (cond.)' : c.pool === 'crudo' ? ' (crudo)' : '');
+      porDestino[key] = (porDestino[key] || 0) + Number(c.kg || 0);
+    }));
+    const totalEnviado = remitosVentana.reduce((s,r) => s + (r.cortes||[]).reduce((s2,c)=>s2+Number(c.kg||0),0), 0);
+
     buildReportePDF({
       label,
       titulo: 'Reporte de recepción',
@@ -1538,11 +1553,15 @@ function generarReportePDF(){
         `Kg recibido: ${fmt(recepcion.kg)} kg`,
         `Kg despiezado: ${fmt(totalDespiezado)} kg`,
         `Kg sin procesar: ${fmt(recepcion.kg - totalDespiezado)} kg`,
+        `Kg enviados a sucursales en el período: ${fmt(totalEnviado)} kg`,
         `Emitido el: ${new Date().toLocaleString('es-PY')}`
       ],
       tablaTitulo: 'Kilos obtenidos por corte',
       tablaHead: ['Corte', 'Kg obtenido'],
       tablaRows: Object.entries(porCorte).map(([c,kg]) => [c, fmt(kg) + ' kg']),
+      tabla2Titulo: 'Envíos a sucursales (por destino y corte)',
+      tabla2Head: ['Sucursal', 'Corte', 'Kg'],
+      tabla2Rows: Object.entries(porDestino).map(([key,kg]) => { const [destino,corte] = key.split('||'); return [destino, corte, fmt(kg) + ' kg']; }),
       archivo: `reporte-recepcion-${producto}-${recepcion.fecha}.pdf`
     });
   } else {
