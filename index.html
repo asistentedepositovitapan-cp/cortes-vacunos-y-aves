@@ -20,6 +20,7 @@
     --burgundy-dark:#5E2222;
     --mustard:#C99A3C;
     --mustard-dark:#A17B27;
+    --info:#3E6B7A;
     --line:#DCD3C4;
     --muted:#8A7F73;
     --good:#3E7A52;
@@ -63,6 +64,19 @@
     margin:0;
     letter-spacing:-0.01em;
   }
+  .install-btn{
+    margin-top:14px;
+    border:1px solid var(--mustard);
+    background:rgba(201,154,60,0.14);
+    color:var(--mustard);
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    padding:9px 14px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+  .install-btn:active{ transform:scale(0.97); }
 
   nav.tabs{
     display:flex;
@@ -112,33 +126,48 @@
     text-transform:uppercase;
     color:rgba(250,247,242,0.55);
     margin:0 0 6px;
+    position:relative;
   }
   .scale-readout{
     font-family:'IBM Plex Mono',monospace;
     font-weight:700;
-    font-size:44px;
+    font-size:40px;
     line-height:1;
     color:var(--mustard);
     display:flex;
     align-items:baseline;
     gap:8px;
+    position:relative;
   }
   .vacuno .scale-readout{ color:#E3A6A6; }
   .scale-readout small{ font-size:16px; font-weight:600; color:rgba(250,247,242,0.6);}
-  .scale-sub{
+
+  .corte-stock-list{
+    margin-top:14px;
     display:flex;
-    gap:18px;
-    margin-top:12px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    color:rgba(250,247,242,0.7);
+    flex-direction:column;
+    gap:6px;
+    position:relative;
   }
-  .scale-sub b{ color:var(--paper); font-weight:600;}
+  .corte-stock-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:rgba(250,247,242,0.08);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:13px;
+  }
+  .corte-stock-row .kg{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+  }
 
   .actions-row{
     display:flex;
     gap:10px;
     margin-top:16px;
+    position:relative;
   }
   .btn{
     flex:1;
@@ -147,18 +176,43 @@
     padding:13px 10px;
     font-family:'Inter',sans-serif;
     font-weight:700;
-    font-size:14px;
+    font-size:13.5px;
     cursor:pointer;
     display:flex;
     align-items:center;
     justify-content:center;
     gap:6px;
+    text-align:center;
   }
   .btn-entrada{ background:var(--good); color:#fff; }
+  .btn-despiece{ background:var(--info); color:#fff; }
   .btn-salida{ background:var(--burgundy); color:#fff; }
   .tabpanel.pollo .btn-salida{ background:var(--mustard-dark); }
   .btn-reporte{ background:rgba(250,247,242,0.12); color:var(--paper); border:1px solid rgba(250,247,242,0.25); }
   .btn:active{ transform:scale(0.98); }
+
+  .raw-stock-box{
+    margin-top:18px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .raw-stock-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+    font-size:13px;
+  }
+  .raw-stock-row:last-child{ border-bottom:none; }
+  .raw-stock-row .name{ font-weight:600; }
+  .raw-stock-row .detail{ color:var(--muted); font-size:11.5px; }
+  .raw-stock-row .kg{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+    text-align:right;
+  }
 
   .section-title{
     font-family:'Bitter',serif;
@@ -198,6 +252,23 @@
     color:var(--muted); font-size:13px; line-height:1; padding:0;
   }
 
+  .filter-row{ display:flex; gap:8px; margin-bottom:12px; }
+  .filter-btn{
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--muted);
+    font-size:12px;
+    font-weight:600;
+    padding:6px 12px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+  .filter-btn.active{
+    background:var(--ink);
+    color:var(--paper);
+    border-color:var(--ink);
+  }
+
   .ticket{
     background:var(--paper);
     border:1px dashed var(--line);
@@ -206,7 +277,7 @@
     margin-bottom:10px;
     position:relative;
   }
-  .ticket .row1{ display:flex; justify-content:space-between; align-items:baseline; }
+  .ticket .row1{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
   .ticket .tag{
     font-family:'IBM Plex Mono',monospace;
     font-size:10px;
@@ -215,27 +286,41 @@
     padding:2px 7px;
     border-radius:4px;
     font-weight:700;
+    white-space:nowrap;
   }
-  .tag.entrada{ background:rgba(62,122,82,0.15); color:var(--good); }
-  .tag.salida{ background:rgba(122,46,46,0.12); color:var(--burgundy); }
-  .tabpanel.pollo .tag.salida{ background:rgba(201,154,60,0.18); color:var(--mustard-dark); }
+  .tag.recepcion{ background:rgba(62,122,82,0.15); color:var(--good); }
+  .tag.despiece{ background:rgba(62,107,122,0.15); color:var(--info); }
+  .tag.remito{ background:rgba(122,46,46,0.12); color:var(--burgundy); }
+  .tabpanel.pollo .tag.remito{ background:rgba(201,154,60,0.18); color:var(--mustard-dark); }
   .ticket .kg{
     font-family:'IBM Plex Mono',monospace;
     font-weight:700;
-    font-size:17px;
+    font-size:16px;
+    white-space:nowrap;
   }
   .ticket .meta{
-    margin-top:4px;
+    margin-top:5px;
     font-size:12.5px;
     color:var(--muted);
     display:flex;
     justify-content:space-between;
     gap:8px;
+    flex-wrap:wrap;
   }
+  .ticket .lines{
+    margin-top:6px;
+    font-size:12.5px;
+    color:var(--ink);
+  }
+  .ticket .lines .line-item{ display:flex; justify-content:space-between; padding:2px 0; }
   .ticket .corte-name{ font-weight:600; color:var(--ink); }
   .ticket .del{
     border:none; background:none; color:var(--muted); font-size:12px;
     cursor:pointer; text-decoration:underline; padding:0;
+  }
+  .ticket .pdf-link{
+    border:none; background:none; color:var(--info); font-size:12px;
+    cursor:pointer; text-decoration:underline; padding:0; font-weight:600;
   }
   .empty{
     text-align:center;
@@ -250,6 +335,7 @@
   .overlay{
     position:fixed; inset:0; background:rgba(36,27,23,0.55);
     display:none; align-items:flex-end; justify-content:center; z-index:50;
+    overflow-y:auto;
   }
   .overlay.show{ display:flex; }
   .modal{
@@ -258,6 +344,7 @@
     border-radius:18px 18px 0 0;
     padding:20px 20px 26px;
     animation:slideup .18s ease-out;
+    margin-top:auto;
   }
   @keyframes slideup{ from{ transform:translateY(30px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
   .modal h2{
@@ -293,6 +380,7 @@
   .modal-actions .btn-secondary{
     flex:1; background:var(--paper-dim); color:var(--ink);
     border:1px solid var(--line); border-radius:10px; padding:13px; font-weight:700; cursor:pointer;
+    font-size:13.5px;
   }
   .modal-actions .btn-primary{
     flex:1.4; border:none; border-radius:10px; padding:13px; font-weight:700; color:#fff; cursor:pointer;
@@ -302,6 +390,36 @@
   .add-corte-inline input{ flex:1; }
   .add-corte-inline button{
     border:none; border-radius:8px; padding:0 14px; font-weight:700; color:#fff; background:var(--ink); cursor:pointer;
+  }
+
+  .corte-line{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+    align-items:center;
+  }
+  .corte-line select{ flex:1.6; }
+  .corte-line input{ flex:1; }
+  .corte-line .rm-line{
+    border:none; background:var(--paper-dim); border-radius:8px; width:38px; height:38px;
+    color:var(--muted); font-size:16px; cursor:pointer; flex-shrink:0;
+  }
+  .add-line-btn{
+    border:1px dashed var(--line);
+    background:none;
+    color:var(--muted);
+    font-weight:600;
+    font-size:13px;
+    padding:9px;
+    border-radius:8px;
+    width:100%;
+    cursor:pointer;
+    margin-bottom:14px;
+  }
+  .lote-hint{
+    font-size:12px;
+    color:var(--muted);
+    margin:-6px 0 14px;
   }
 
   .toast{
@@ -331,6 +449,7 @@
   <header class="top">
     <p class="eyebrow">Depósito · Control de mercadería</p>
     <h1>Control de Productos<br>Cárnicos y Pollos</h1>
+    <button id="installBtn" class="install-btn" style="display:none;" onclick="triggerInstall()">⬇ Instalar app</button>
   </header>
 
   <nav class="tabs">
@@ -352,18 +471,13 @@
 <!-- Firebase (compat SDK, vanilla JS) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<!-- jsPDF (generación de reportes en PDF) -->
+<!-- jsPDF (generación de reportes y remitos en PDF) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 <script>
 /* =========================================================
    1) CONFIGURACIÓN DE FIREBASE
-   Reemplazá estos valores por los de tu proyecto Firebase
-   (Firebase console → Configuración del proyecto → Tus apps → SDK setup).
-   Recordá también crear un proyecto nuevo o reutilizar uno existente,
-   habilitar Firestore, y abrir las reglas para lectura/escritura
-   (o protegerlas según tu criterio).
 ========================================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyCUEQMqmakCs6zGMbmsXD2ioFMW5djB08U",
@@ -386,8 +500,19 @@ if (isConfigured) {
 }
 
 /* =========================================================
-   2) ESTADO
+   2) ESTADO Y VALORES POR DEFECTO
+
+   MODELO DE DATOS (3 pasos):
+   1. "recepciones"  -> materia prima cruda que entra (ej: 21.4 kg de Lomo)
+   2. "despieces"    -> de una recepción, cuántos kg de cada corte final se
+                        obtuvieron (ej: de ese Lomo salieron 9kg Milanesa + 6kg Sandwich)
+   3. "remitos"      -> envío de cortes ya separados a una sucursal/destino
 ========================================================= */
+const DEFAULT_MATERIAS_PRIMAS = {
+  vacuno: ["Lomo", "Carnaza", "Vacío", "Matambre"],
+  pollo: ["Pechuga", "Muslo", "Ala", "Pata"]
+};
+
 const DEFAULT_CORTES = {
   vacuno: ["Corte para Milanesa", "Corte para Sandwich"],
   pollo: ["Corte para Milanesa", "Corte para Sandwich", "Corte para Grille"]
@@ -397,10 +522,13 @@ const DEFAULT_DESTINOS = ["Producción", "San Lorenzo", "Laureles", "Gran Santos
 
 let state = {
   tab: 'vacuno',
+  materiasPrimas: { vacuno: [], pollo: [] },
   cortes: { vacuno: [], pollo: [] },
   destinos: [],
-  movimientos: { vacuno: [], pollo: [] },
-  cortesLoaded: false
+  recepciones: { vacuno: [], pollo: [] },
+  despieces: { vacuno: [], pollo: [] },
+  remitos: { vacuno: [], pollo: [] },
+  historialFiltro: 'todos' // 'todos' | 'recepcion' | 'despiece' | 'remito'
 };
 
 /* =========================================================
@@ -409,22 +537,30 @@ let state = {
 function initFirestore(){
   if (!db) { renderAll(); return; }
 
-  // cortes (config/cortes doc con arrays por producto)
+  db.collection('config').doc('materiasPrimas').onSnapshot(async (doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      state.materiasPrimas.vacuno = data.vacuno || [];
+      state.materiasPrimas.pollo = data.pollo || [];
+    } else {
+      await db.collection('config').doc('materiasPrimas').set(DEFAULT_MATERIAS_PRIMAS);
+      state.materiasPrimas = { vacuno: [...DEFAULT_MATERIAS_PRIMAS.vacuno], pollo: [...DEFAULT_MATERIAS_PRIMAS.pollo] };
+    }
+    renderAll();
+  }, (err) => { console.error(err); showToast('Error al leer materias primas: ' + err.message); });
+
   db.collection('config').doc('cortes').onSnapshot(async (doc) => {
     if (doc.exists) {
       const data = doc.data();
       state.cortes.vacuno = data.vacuno || [];
       state.cortes.pollo = data.pollo || [];
     } else {
-      // primera vez: crear con valores por defecto
       await db.collection('config').doc('cortes').set(DEFAULT_CORTES);
-      state.cortes = { ...DEFAULT_CORTES };
+      state.cortes = { vacuno: [...DEFAULT_CORTES.vacuno], pollo: [...DEFAULT_CORTES.pollo] };
     }
-    state.cortesLoaded = true;
     renderAll();
   }, (err) => { console.error(err); showToast('Error al leer cortes: ' + err.message); });
 
-  // destinos (config/destinos doc con lista compartida entre vacuno y pollo)
   db.collection('config').doc('destinos').onSnapshot(async (doc) => {
     if (doc.exists) {
       state.destinos = doc.data().lista || [];
@@ -435,57 +571,100 @@ function initFirestore(){
     renderAll();
   }, (err) => { console.error(err); showToast('Error al leer destinos: ' + err.message); });
 
-  // movimientos
-  db.collection('movimientos').orderBy('timestamp', 'desc').onSnapshot((snap) => {
+  db.collection('recepciones').orderBy('timestamp', 'desc').onSnapshot((snap) => {
     const vacuno = [], pollo = [];
     snap.forEach((doc) => {
-      const m = { id: doc.id, ...doc.data() };
-      if (m.producto === 'vacuno') vacuno.push(m);
-      else if (m.producto === 'pollo') pollo.push(m);
+      const r = { id: doc.id, ...doc.data() };
+      (r.producto === 'pollo' ? pollo : vacuno).push(r);
     });
-    state.movimientos.vacuno = vacuno;
-    state.movimientos.pollo = pollo;
+    state.recepciones.vacuno = vacuno;
+    state.recepciones.pollo = pollo;
     renderAll();
-  }, (err) => { console.error(err); showToast('Error al leer movimientos: ' + err.message); });
+  }, (err) => { console.error(err); showToast('Error al leer recepciones: ' + err.message); });
+
+  db.collection('despieces').orderBy('timestamp', 'desc').onSnapshot((snap) => {
+    const vacuno = [], pollo = [];
+    snap.forEach((doc) => {
+      const d = { id: doc.id, ...doc.data() };
+      (d.producto === 'pollo' ? pollo : vacuno).push(d);
+    });
+    state.despieces.vacuno = vacuno;
+    state.despieces.pollo = pollo;
+    renderAll();
+  }, (err) => { console.error(err); showToast('Error al leer despieces: ' + err.message); });
+
+  db.collection('remitos').orderBy('timestamp', 'desc').onSnapshot((snap) => {
+    const vacuno = [], pollo = [];
+    snap.forEach((doc) => {
+      const r = { id: doc.id, ...doc.data() };
+      (r.producto === 'pollo' ? pollo : vacuno).push(r);
+    });
+    state.remitos.vacuno = vacuno;
+    state.remitos.pollo = pollo;
+    renderAll();
+  }, (err) => { console.error(err); showToast('Error al leer remitos: ' + err.message); });
 }
 
 /* =========================================================
-   4) LÓGICA
+   4) LÓGICA / CÁLCULOS DE STOCK
 ========================================================= */
-function computeStock(producto){
-  const movs = state.movimientos[producto] || [];
-  let entradas = 0, salidas = 0;
-  movs.forEach(m => {
-    const kg = Number(m.kg) || 0;
-    if (m.tipo === 'entrada') entradas += kg;
-    else salidas += kg;
+function computeRawStock(producto){
+  const recepciones = state.recepciones[producto] || [];
+  const despiezos = state.despieces[producto] || [];
+  const despiezoPorLote = {};
+  despiezos.forEach(d => {
+    const total = (d.cortes || []).reduce((s,c) => s + Number(c.kg || 0), 0);
+    despiezoPorLote[d.recepcionId] = (despiezoPorLote[d.recepcionId] || 0) + total;
   });
-  return { stock: entradas - salidas, entradas, salidas };
+  const porLote = recepciones.map(r => {
+    const desp = despiezoPorLote[r.id] || 0;
+    return { recepcion: r, despiezado: desp, disponible: Number(r.kg || 0) - desp };
+  });
+  const porMateriaPrima = {};
+  porLote.forEach(x => {
+    const nombre = x.recepcion.materiaPrima || 'Sin especificar';
+    if (!porMateriaPrima[nombre]) porMateriaPrima[nombre] = { recibido: 0, despiezado: 0, disponible: 0 };
+    porMateriaPrima[nombre].recibido += Number(x.recepcion.kg || 0);
+    porMateriaPrima[nombre].despiezado += x.despiezado;
+    porMateriaPrima[nombre].disponible += x.disponible;
+  });
+  return { porLote, porMateriaPrima };
+}
+
+function computeCorteStock(producto){
+  const despiezos = state.despieces[producto] || [];
+  const remitos = state.remitos[producto] || [];
+  const totals = {};
+  despiezos.forEach(d => (d.cortes || []).forEach(c => {
+    totals[c.corte] = (totals[c.corte] || 0) + Number(c.kg || 0);
+  }));
+  remitos.forEach(r => (r.cortes || []).forEach(c => {
+    totals[c.corte] = (totals[c.corte] || 0) - Number(c.kg || 0);
+  }));
+  return totals;
 }
 
 function fmt(n){
   return (Math.round(n * 100) / 100).toLocaleString('es-PY', { minimumFractionDigits: n % 1 === 0 ? 0 : 2 });
 }
-
-function fechaHoy(){
-  const d = new Date();
-  return d.toISOString().slice(0,10);
-}
-
+function fechaHoy(){ return new Date().toISOString().slice(0,10); }
 function fechaBonita(iso){
   if (!iso) return '';
   const [y,m,d] = iso.split('-');
   return `${d}/${m}/${y}`;
 }
-
 function tsMillis(m){
   if (m.timestamp && typeof m.timestamp.toDate === 'function') return m.timestamp.toDate().getTime();
   if (m.fecha) return new Date(m.fecha + 'T00:00:00').getTime();
   return 0;
 }
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return String(s).replace(/'/g, "\\'"); }
 
 /* =========================================================
-   5) RENDER
+   5) RENDER PRINCIPAL
 ========================================================= */
 function setTab(tab){
   state.tab = tab;
@@ -496,31 +675,62 @@ function setTab(tab){
 function renderAll(){
   const producto = state.tab;
   const label = producto === 'vacuno' ? 'Vacuno' : 'Pollo';
-  const { stock, entradas, salidas } = computeStock(producto);
   const cortes = state.cortes[producto] || [];
-  const movs = state.movimientos[producto] || [];
+  const materiasPrimas = state.materiasPrimas[producto] || [];
+
+  const corteStock = computeCorteStock(producto);
+  const totalCorteStock = Object.values(corteStock).reduce((s,v) => s+v, 0);
+  const corteKeys = Array.from(new Set([...cortes, ...Object.keys(corteStock)]));
+
+  const { porMateriaPrima } = computeRawStock(producto);
+  const mpKeys = Array.from(new Set([...materiasPrimas, ...Object.keys(porMateriaPrima)]));
 
   const main = document.getElementById('main');
   main.innerHTML = `
     <div class="tabpanel ${producto}">
       <div class="scale-panel ${producto}">
-        <p class="scale-label">Stock disponible · ${label}</p>
-        <div class="scale-readout">${fmt(stock)}<small>kg</small></div>
-        <div class="scale-sub">
-          <span>Recibido: <b>${fmt(entradas)} kg</b></span>
-          <span>Usado: <b>${fmt(salidas)} kg</b></span>
+        <p class="scale-label">Stock de cortes listos para despacho</p>
+        <div class="scale-readout">${fmt(totalCorteStock)}<small>kg</small></div>
+
+        <div class="corte-stock-list">
+          ${corteKeys.length ? corteKeys.map(c => `
+            <div class="corte-stock-row">
+              <span>${escapeHtml(c)}</span>
+              <span class="kg">${fmt(corteStock[c] || 0)} kg</span>
+            </div>
+          `).join('') : '<div class="corte-stock-row"><span>Todavía no hay cortes separados.</span></div>'}
+        </div>
+
+        <div class="actions-row">
+          <button class="btn btn-entrada" onclick="openRecepcionModal()">＋ Cargar recepción</button>
+          <button class="btn btn-despiece" onclick="openDespieceModal()">🔪 Despiece</button>
         </div>
         <div class="actions-row">
-          <button class="btn btn-entrada" onclick="openEntradaModal()">＋ Cargar recepción</button>
-          <button class="btn btn-salida" onclick="openSalidaModal()">－ Registrar corte</button>
-        </div>
-        <div class="actions-row" style="margin-top:8px;">
-          <button class="btn btn-reporte" onclick="openReporteModal()">📄 Generar reporte PDF</button>
+          <button class="btn btn-salida" onclick="openRemitoModal()">🚚 Generar remito</button>
+          <button class="btn btn-reporte" onclick="openReporteModal()">📄 Reporte</button>
         </div>
       </div>
 
       <div class="section-title">
-        Cortes de ${label.toLowerCase()}
+        Materia prima en stock (sin procesar)
+        <button class="link-btn" onclick="openManageMateriasPrimasModal()">Administrar</button>
+      </div>
+      <div class="raw-stock-box">
+        ${mpKeys.length ? mpKeys.map(nombre => {
+          const d = porMateriaPrima[nombre] || { recibido:0, despiezado:0, disponible:0 };
+          return `
+          <div class="raw-stock-row">
+            <div>
+              <div class="name">${escapeHtml(nombre)}</div>
+              <div class="detail">Recibido ${fmt(d.recibido)} kg · Despiezado ${fmt(d.despiezado)} kg</div>
+            </div>
+            <div class="kg">${fmt(d.disponible)} kg<br><span class="detail">disponible</span></div>
+          </div>`;
+        }).join('') : '<div class="raw-stock-row"><span class="detail">Sin materia prima cargada todavía.</span></div>'}
+      </div>
+
+      <div class="section-title">
+        Cortes finales
         <button class="link-btn" onclick="openManageCortesModal()">Administrar</button>
       </div>
       <div class="chips">
@@ -535,34 +745,92 @@ function renderAll(){
         ${state.destinos.length ? state.destinos.map(d => `<span class="chip">${escapeHtml(d)}</span>`).join('') : '<span style="font-size:13px;color:var(--muted)">Sin destinos cargados todavía.</span>'}
       </div>
 
-      <div class="section-title">Historial de movimientos</div>
-      ${movs.length ? movs.map(renderTicket).join('') : '<div class="empty">Todavía no hay movimientos cargados para ' + label.toLowerCase() + '.</div>'}
+      <div class="section-title">Historial</div>
+      <div class="filter-row">
+        <button class="filter-btn ${state.historialFiltro==='todos'?'active':''}" onclick="setHistorialFiltro('todos')">Todo</button>
+        <button class="filter-btn ${state.historialFiltro==='recepcion'?'active':''}" onclick="setHistorialFiltro('recepcion')">Recepciones</button>
+        <button class="filter-btn ${state.historialFiltro==='despiece'?'active':''}" onclick="setHistorialFiltro('despiece')">Despieces</button>
+        <button class="filter-btn ${state.historialFiltro==='remito'?'active':''}" onclick="setHistorialFiltro('remito')">Remitos</button>
+      </div>
+      ${renderHistorial(producto)}
     </div>
   `;
 }
 
-function renderTicket(m){
-  const isEntrada = m.tipo === 'entrada';
-  const destinoLine = (!isEntrada && m.destino) ? ` · <span style="color:var(--muted)">${escapeHtml(m.destino)}</span>` : '';
+function setHistorialFiltro(f){
+  state.historialFiltro = f;
+  renderAll();
+}
+
+function renderHistorial(producto){
+  let items = [
+    ...(state.recepciones[producto] || []).map(x => ({ ...x, _kind: 'recepcion' })),
+    ...(state.despieces[producto] || []).map(x => ({ ...x, _kind: 'despiece' })),
+    ...(state.remitos[producto] || []).map(x => ({ ...x, _kind: 'remito' }))
+  ];
+  if (state.historialFiltro !== 'todos') items = items.filter(i => i._kind === state.historialFiltro);
+  items.sort((a,b) => tsMillis(b) - tsMillis(a));
+
+  if (!items.length) return '<div class="empty">Todavía no hay movimientos en esta categoría.</div>';
+  return items.map(renderTicket).join('');
+}
+
+function renderTicket(item){
+  if (item._kind === 'recepcion') {
+    return `
+      <div class="ticket">
+        <div class="row1">
+          <span class="tag recepcion">Recepción</span>
+          <span class="kg">+${fmt(item.kg)} kg</span>
+        </div>
+        <div class="meta">
+          <span class="corte-name">${escapeHtml(item.materiaPrima || 'Materia prima')}</span>
+        </div>
+        <div class="meta">
+          <span>${fechaBonita(item.fecha)}${item.nota ? ' · ' + escapeHtml(item.nota) : ''}</span>
+          <button class="del" onclick="deleteDoc('recepciones','${item.id}')">Eliminar</button>
+        </div>
+      </div>`;
+  }
+  if (item._kind === 'despiece') {
+    const total = (item.cortes || []).reduce((s,c) => s + Number(c.kg||0), 0);
+    return `
+      <div class="ticket">
+        <div class="row1">
+          <span class="tag despiece">Despiece</span>
+          <span class="kg">${fmt(total)} kg</span>
+        </div>
+        <div class="meta"><span>Origen: <span class="corte-name">${escapeHtml(item.materiaPrima || '')}</span></span></div>
+        <div class="lines">
+          ${(item.cortes || []).map(c => `<div class="line-item"><span>${escapeHtml(c.corte)}</span><span>${fmt(c.kg)} kg</span></div>`).join('')}
+        </div>
+        <div class="meta">
+          <span>${fechaBonita(item.fecha)}${item.nota ? ' · ' + escapeHtml(item.nota) : ''}</span>
+          <button class="del" onclick="deleteDoc('despieces','${item.id}')">Eliminar</button>
+        </div>
+      </div>`;
+  }
+  // remito
+  const total = (item.cortes || []).reduce((s,c) => s + Number(c.kg||0), 0);
   return `
     <div class="ticket">
       <div class="row1">
-        <span class="tag ${m.tipo}">${isEntrada ? 'Recepción' : 'Salida'}</span>
-        <span class="kg">${isEntrada ? '+' : '−'}${fmt(m.kg)} kg</span>
+        <span class="tag remito">Remito</span>
+        <span class="kg">−${fmt(total)} kg</span>
+      </div>
+      <div class="meta"><span>Destino: <span class="corte-name">${escapeHtml(item.destino || '')}</span></span></div>
+      <div class="lines">
+        ${(item.cortes || []).map(c => `<div class="line-item"><span>${escapeHtml(c.corte)}</span><span>${fmt(c.kg)} kg</span></div>`).join('')}
       </div>
       <div class="meta">
-        <span>${isEntrada ? (m.nota ? escapeHtml(m.nota) : 'Ingreso de mercadería') : `<span class="corte-name">${escapeHtml(m.corte || 'Corte')}</span>${destinoLine}${m.nota ? ' · ' + escapeHtml(m.nota) : ''}`}</span>
+        <span>${fechaBonita(item.fecha)}${item.nota ? ' · ' + escapeHtml(item.nota) : ''}</span>
+        <span>
+          <button class="pdf-link" onclick="regenerarRemitoPDF('${item.id}')">PDF</button>
+          &nbsp;·&nbsp;
+          <button class="del" onclick="deleteDoc('remitos','${item.id}')">Eliminar</button>
+        </span>
       </div>
-      <div class="meta">
-        <span>${fechaBonita(m.fecha)}</span>
-        <button class="del" onclick="deleteMovimiento('${m.id}')">Eliminar</button>
-      </div>
-    </div>
-  `;
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    </div>`;
 }
 
 /* =========================================================
@@ -579,41 +847,51 @@ document.getElementById('overlay').addEventListener('click', (e) => {
   if (e.target.id === 'overlay') closeModal();
 });
 
-function openEntradaModal(){
+/* ---- 6.1 Cargar recepción (materia prima cruda) ---- */
+function openRecepcionModal(){
   const producto = state.tab;
   const label = producto === 'vacuno' ? 'vacuno' : 'pollo';
+  const materias = state.materiasPrimas[producto] || [];
+  const options = materias.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
   showModal(`
     <h2>Cargar recepción · ${label}</h2>
     <div class="field">
+      <label>Materia prima</label>
+      <select id="fRecepcionMP">
+        ${options || '<option value="">Sin materias primas cargadas</option>'}
+      </select>
+    </div>
+    <div class="field">
       <label>Kilos recibidos</label>
-      <input type="number" id="fEntradaKg" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 85.5" autofocus>
+      <input type="number" id="fRecepcionKg" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 21.4" autofocus>
     </div>
     <div class="field">
       <label>Fecha</label>
-      <input type="date" id="fEntradaFecha" value="${fechaHoy()}">
+      <input type="date" id="fRecepcionFecha" value="${fechaHoy()}">
     </div>
     <div class="field">
       <label>Nota (proveedor, guía, etc.) — opcional</label>
-      <input type="text" id="fEntradaNota" placeholder="Ej: Proveedor Frigorífico X, remito 1234">
+      <input type="text" id="fRecepcionNota" placeholder="Ej: Proveedor Frigorífico X, remito 1234">
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
-      <button class="btn-primary" style="background:var(--good)" onclick="guardarEntrada()">Guardar recepción</button>
+      <button class="btn-primary" style="background:var(--good)" onclick="guardarRecepcion()">Guardar recepción</button>
     </div>
   `);
 }
 
-async function guardarEntrada(){
-  const kg = parseFloat(document.getElementById('fEntradaKg').value);
-  const fecha = document.getElementById('fEntradaFecha').value || fechaHoy();
-  const nota = document.getElementById('fEntradaNota').value.trim();
+async function guardarRecepcion(){
+  const materiaPrima = document.getElementById('fRecepcionMP').value;
+  const kg = parseFloat(document.getElementById('fRecepcionKg').value);
+  const fecha = document.getElementById('fRecepcionFecha').value || fechaHoy();
+  const nota = document.getElementById('fRecepcionNota').value.trim();
+  if (!materiaPrima){ showToast('Elegí una materia prima'); return; }
   if (!kg || kg <= 0){ showToast('Ingresá un valor de kg válido'); return; }
   if (!db){ showToast('Falta configurar Firebase'); return; }
   try {
-    await db.collection('movimientos').add({
+    await db.collection('recepciones').add({
       producto: state.tab,
-      tipo: 'entrada',
-      corte: null,
+      materiaPrima,
       kg,
       fecha,
       nota,
@@ -626,72 +904,273 @@ async function guardarEntrada(){
   }
 }
 
-function openSalidaModal(){
+/* ---- 6.2 Registrar despiece (materia prima -> cortes) ---- */
+let despieceLineCount = 0;
+
+function openDespieceModal(){
   const producto = state.tab;
   const label = producto === 'vacuno' ? 'vacuno' : 'pollo';
-  const cortes = state.cortes[producto] || [];
-  const options = cortes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-  const destinoOptions = state.destinos.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+  const { porLote } = computeRawStock(producto);
+  const lotesDisponibles = porLote.filter(x => x.disponible > 0.001).sort((a,b) => tsMillis(b.recepcion) - tsMillis(a.recepcion));
+
+  const loteOptions = lotesDisponibles.map(x =>
+    `<option value="${x.recepcion.id}">${escapeHtml(x.recepcion.materiaPrima)} · ${fechaBonita(x.recepcion.fecha)} · disponible ${fmt(x.disponible)} kg</option>`
+  ).join('');
+
+  despieceLineCount = 0;
   showModal(`
-    <h2>Registrar corte · ${label}</h2>
+    <h2>Registrar despiece · ${label}</h2>
     <div class="field">
-      <label>Tipo de corte</label>
-      <select id="fSalidaCorte">
-        ${options || '<option value="">Sin cortes cargados</option>'}
+      <label>Recepción de origen</label>
+      <select id="fDespieceLote">
+        ${loteOptions || '<option value="">No hay materia prima disponible</option>'}
       </select>
     </div>
-    <div class="field">
-      <label>Destino</label>
-      <select id="fSalidaDestino">
-        ${destinoOptions || '<option value="">Sin destinos cargados</option>'}
-      </select>
-    </div>
-    <div class="field">
-      <label>Kilos utilizados</label>
-      <input type="number" id="fSalidaKg" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 4.2" autofocus>
-    </div>
+    <p class="lote-hint">Elegí de qué recepción de materia prima estás sacando los cortes.</p>
+
+    <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Cortes obtenidos</label>
+    <div id="despieceLines"></div>
+    <button type="button" class="add-line-btn" onclick="addDespieceLine()">＋ Agregar otro corte</button>
+
     <div class="field">
       <label>Fecha</label>
-      <input type="date" id="fSalidaFecha" value="${fechaHoy()}">
+      <input type="date" id="fDespieceFecha" value="${fechaHoy()}">
     </div>
     <div class="field">
       <label>Nota — opcional</label>
-      <input type="text" id="fSalidaNota" placeholder="Ej: Pedido especial">
+      <input type="text" id="fDespieceNota" placeholder="Ej: Despiece turno mañana">
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
-      <button class="btn-primary" onclick="guardarSalida()">Guardar salida</button>
+      <button class="btn-primary" style="background:var(--info)" onclick="guardarDespiece()">Guardar despiece</button>
     </div>
   `);
+  addDespieceLine();
 }
 
-async function guardarSalida(){
-  const corte = document.getElementById('fSalidaCorte').value;
-  const destino = document.getElementById('fSalidaDestino').value;
-  const kg = parseFloat(document.getElementById('fSalidaKg').value);
-  const fecha = document.getElementById('fSalidaFecha').value || fechaHoy();
-  const nota = document.getElementById('fSalidaNota').value.trim();
-  if (!corte){ showToast('Elegí un tipo de corte'); return; }
-  if (!destino){ showToast('Elegí un destino'); return; }
-  if (!kg || kg <= 0){ showToast('Ingresá un valor de kg válido'); return; }
-  const { stock } = computeStock(state.tab);
-  if (kg > stock + 0.001){
-    if (!confirm(`Esto deja el stock en negativo (disponible: ${fmt(stock)} kg). ¿Confirmás igual?`)) return;
+function addDespieceLine(){
+  const producto = state.tab;
+  const cortes = state.cortes[producto] || [];
+  const options = cortes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  const idx = despieceLineCount++;
+  const container = document.getElementById('despieceLines');
+  const div = document.createElement('div');
+  div.className = 'corte-line';
+  div.id = 'despieceLine' + idx;
+  div.innerHTML = `
+    <select id="despieceCorte${idx}">${options || '<option value="">Sin cortes</option>'}</select>
+    <input type="number" id="despieceKg${idx}" inputmode="decimal" step="0.01" min="0" placeholder="Kg">
+    <button type="button" class="rm-line" onclick="removeLine('despieceLine${idx}')">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+function removeLine(id){
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+async function guardarDespiece(){
+  const producto = state.tab;
+  const recepcionId = document.getElementById('fDespieceLote').value;
+  if (!recepcionId){ showToast('Elegí una recepción de origen'); return; }
+
+  const { porLote } = computeRawStock(producto);
+  const lote = porLote.find(x => x.recepcion.id === recepcionId);
+  if (!lote){ showToast('No se encontró la recepción'); return; }
+
+  const container = document.getElementById('despieceLines');
+  const lineDivs = container.querySelectorAll('.corte-line');
+  const cortesArr = [];
+  for (const div of lineDivs) {
+    const select = div.querySelector('select');
+    const input = div.querySelector('input');
+    const corte = select.value;
+    const kg = parseFloat(input.value);
+    if (!corte || !kg || kg <= 0) continue;
+    cortesArr.push({ corte, kg });
   }
+  if (!cortesArr.length){ showToast('Agregá al menos un corte con su kg'); return; }
+
+  const totalAsignado = cortesArr.reduce((s,c) => s + c.kg, 0);
+  if (totalAsignado > lote.disponible + 0.001) {
+    if (!confirm(`Estás asignando ${fmt(totalAsignado)} kg pero la recepción solo tiene ${fmt(lote.disponible)} kg disponibles. ¿Confirmás igual?`)) return;
+  }
+
+  const fecha = document.getElementById('fDespieceFecha').value || fechaHoy();
+  const nota = document.getElementById('fDespieceNota').value.trim();
+
   if (!db){ showToast('Falta configurar Firebase'); return; }
   try {
-    await db.collection('movimientos').add({
-      producto: state.tab,
-      tipo: 'salida',
-      corte,
-      destino,
-      kg,
+    await db.collection('despieces').add({
+      producto,
+      recepcionId,
+      materiaPrima: lote.recepcion.materiaPrima,
+      cortes: cortesArr,
       fecha,
       nota,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     closeModal();
-    showToast('Corte registrado');
+    showToast('Despiece registrado');
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+/* ---- 6.3 Generar remito (cortes -> destino) ---- */
+let remitoLineCount = 0;
+
+function openRemitoModal(){
+  const producto = state.tab;
+  const label = producto === 'vacuno' ? 'vacuno' : 'pollo';
+  const destinoOptions = state.destinos.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+
+  remitoLineCount = 0;
+  showModal(`
+    <h2>Generar remito · ${label}</h2>
+    <div class="field">
+      <label>Destino</label>
+      <select id="fRemitoDestino">
+        ${destinoOptions || '<option value="">Sin destinos cargados</option>'}
+      </select>
+    </div>
+
+    <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Cortes a enviar</label>
+    <div id="remitoLines"></div>
+    <button type="button" class="add-line-btn" onclick="addRemitoLine()">＋ Agregar otro corte</button>
+
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="fRemitoFecha" value="${fechaHoy()}">
+    </div>
+    <div class="field">
+      <label>Nota — opcional</label>
+      <input type="text" id="fRemitoNota" placeholder="Ej: Pedido especial">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarRemito()">Guardar y generar PDF</button>
+    </div>
+  `);
+  addRemitoLine();
+}
+
+function addRemitoLine(){
+  const producto = state.tab;
+  const cortes = state.cortes[producto] || [];
+  const stock = computeCorteStock(producto);
+  const options = cortes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)} (${fmt(stock[c]||0)} kg disp.)</option>`).join('');
+  const idx = remitoLineCount++;
+  const container = document.getElementById('remitoLines');
+  const div = document.createElement('div');
+  div.className = 'corte-line';
+  div.id = 'remitoLine' + idx;
+  div.innerHTML = `
+    <select id="remitoCorte${idx}">${options || '<option value="">Sin cortes</option>'}</select>
+    <input type="number" id="remitoKg${idx}" inputmode="decimal" step="0.01" min="0" placeholder="Kg">
+    <button type="button" class="rm-line" onclick="removeLine('remitoLine${idx}')">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+async function guardarRemito(){
+  const producto = state.tab;
+  const destino = document.getElementById('fRemitoDestino').value;
+  if (!destino){ showToast('Elegí un destino'); return; }
+
+  const container = document.getElementById('remitoLines');
+  const lineDivs = container.querySelectorAll('.corte-line');
+  const cortesArr = [];
+  for (const div of lineDivs) {
+    const select = div.querySelector('select');
+    const input = div.querySelector('input');
+    const corte = select.value;
+    const kg = parseFloat(input.value);
+    if (!corte || !kg || kg <= 0) continue;
+    cortesArr.push({ corte, kg });
+  }
+  if (!cortesArr.length){ showToast('Agregá al menos un corte con su kg'); return; }
+
+  const stock = computeCorteStock(producto);
+  const excedidos = cortesArr.filter(c => c.kg > (stock[c.corte] || 0) + 0.001);
+  if (excedidos.length) {
+    const detalle = excedidos.map(c => `${c.corte} (disponible: ${fmt(stock[c.corte]||0)} kg)`).join(', ');
+    if (!confirm(`Esto deja stock negativo en: ${detalle}. ¿Confirmás igual?`)) return;
+  }
+
+  const fecha = document.getElementById('fRemitoFecha').value || fechaHoy();
+  const nota = document.getElementById('fRemitoNota').value.trim();
+
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    const docRef = await db.collection('remitos').add({
+      producto,
+      destino,
+      cortes: cortesArr,
+      fecha,
+      nota,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal();
+    showToast('Remito generado');
+    buildRemitoPDF({ id: docRef.id, producto, destino, cortes: cortesArr, fecha, nota });
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+function regenerarRemitoPDF(id){
+  const producto = state.tab;
+  const remito = (state.remitos[producto] || []).find(r => r.id === id);
+  if (!remito){ showToast('No se encontró el remito'); return; }
+  buildRemitoPDF(remito);
+}
+
+/* ---- 6.4 Administrar materias primas / cortes / destinos ---- */
+function openManageMateriasPrimasModal(){
+  const producto = state.tab;
+  const materias = state.materiasPrimas[producto] || [];
+  showModal(`
+    <h2>Administrar materia prima</h2>
+    <div class="chips" id="manageChipsMP">
+      ${materias.map(m => `<span class="chip">${escapeHtml(m)} <button onclick="eliminarMateriaPrima('${escapeAttr(m)}')">✕</button></span>`).join('') || '<span style="font-size:13px;color:var(--muted)">Sin materias primas todavía.</span>'}
+    </div>
+    <div class="add-corte-inline">
+      <input type="text" id="fNuevaMP" placeholder="Ej: Peceto">
+      <button onclick="agregarMateriaPrima()">Agregar</button>
+    </div>
+    <div class="modal-actions" style="margin-top:18px;">
+      <button class="btn-secondary" style="flex:1" onclick="closeModal()">Listo</button>
+    </div>
+  `);
+}
+
+async function agregarMateriaPrima(){
+  const input = document.getElementById('fNuevaMP');
+  const nombre = input.value.trim();
+  if (!nombre) return;
+  const producto = state.tab;
+  const actuales = state.materiasPrimas[producto] || [];
+  if (actuales.includes(nombre)){ showToast('Esa materia prima ya existe'); return; }
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('config').doc('materiasPrimas').set({ [producto]: [...actuales, nombre] }, { merge: true });
+    input.value = '';
+    setTimeout(openManageMateriasPrimasModal, 150);
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+async function eliminarMateriaPrima(nombre){
+  const producto = state.tab;
+  const actuales = state.materiasPrimas[producto] || [];
+  if (!confirm(`¿Eliminar "${nombre}"? (no borra las recepciones ya cargadas)`)) return;
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('config').doc('materiasPrimas').set({ [producto]: actuales.filter(m => m !== nombre) }, { merge: true });
+    setTimeout(openManageMateriasPrimasModal, 150);
   } catch (err) {
     showToast('Error: ' + err.message);
   }
@@ -716,10 +1195,6 @@ function openManageCortesModal(){
   `);
 }
 
-function escapeAttr(s){
-  return String(s).replace(/'/g, "\\'");
-}
-
 async function agregarCorte(){
   const input = document.getElementById('fNuevoCorte');
   const nombre = input.value.trim();
@@ -729,9 +1204,7 @@ async function agregarCorte(){
   if (actuales.includes(nombre)){ showToast('Ese corte ya existe'); return; }
   if (!db){ showToast('Falta configurar Firebase'); return; }
   try {
-    await db.collection('config').doc('cortes').set({
-      [producto]: [...actuales, nombre]
-    }, { merge: true });
+    await db.collection('config').doc('cortes').set({ [producto]: [...actuales, nombre] }, { merge: true });
     input.value = '';
     setTimeout(openManageCortesModal, 150);
   } catch (err) {
@@ -745,9 +1218,7 @@ async function eliminarCorte(nombre){
   if (!confirm(`¿Eliminar el corte "${nombre}"? (no borra los movimientos ya cargados)`)) return;
   if (!db){ showToast('Falta configurar Firebase'); return; }
   try {
-    await db.collection('config').doc('cortes').set({
-      [producto]: actuales.filter(c => c !== nombre)
-    }, { merge: true });
+    await db.collection('config').doc('cortes').set({ [producto]: actuales.filter(c => c !== nombre) }, { merge: true });
     setTimeout(openManageCortesModal, 150);
   } catch (err) {
     showToast('Error: ' + err.message);
@@ -799,11 +1270,12 @@ async function eliminarDestino(nombre){
   }
 }
 
-async function deleteMovimiento(id){
+/* ---- 6.5 Eliminar cualquier documento ---- */
+async function deleteDoc(coleccion, id){
   if (!confirm('¿Eliminar este movimiento?')) return;
   if (!db){ showToast('Falta configurar Firebase'); return; }
   try {
-    await db.collection('movimientos').doc(id).delete();
+    await db.collection(coleccion).doc(id).delete();
     showToast('Movimiento eliminado');
   } catch (err) {
     showToast('Error: ' + err.message);
@@ -811,7 +1283,7 @@ async function deleteMovimiento(id){
 }
 
 /* =========================================================
-   6b) REPORTES EN PDF
+   6b) REPORTES Y REMITO EN PDF
 ========================================================= */
 let reporteModo = 'recepcion'; // 'recepcion' | 'rango'
 
@@ -823,10 +1295,10 @@ function openReporteModal(){
 function renderReporteModal(){
   const producto = state.tab;
   const label = producto === 'vacuno' ? 'Vacuno' : 'Pollo';
-  const entradas = (state.movimientos[producto] || []).filter(m => m.tipo === 'entrada');
+  const recepciones = state.recepciones[producto] || [];
 
-  const entradaOptions = entradas.map(e =>
-    `<option value="${e.id}">${fechaBonita(e.fecha)} · ${fmt(e.kg)} kg${e.nota ? ' — ' + escapeHtml(e.nota) : ''}</option>`
+  const recepcionOptions = recepciones.map(r =>
+    `<option value="${r.id}">${fechaBonita(r.fecha)} · ${escapeHtml(r.materiaPrima)} · ${fmt(r.kg)} kg</option>`
   ).join('');
 
   showModal(`
@@ -839,12 +1311,12 @@ function renderReporteModal(){
     ${reporteModo === 'recepcion' ? `
       <div class="field">
         <label>Elegí la recepción (compra)</label>
-        <select id="fReporteEntrada">
-          ${entradaOptions || '<option value="">No hay recepciones cargadas</option>'}
+        <select id="fReporteRecepcion">
+          ${recepcionOptions || '<option value="">No hay recepciones cargadas</option>'}
         </select>
       </div>
       <p style="font-size:12.5px;color:var(--muted);margin-top:-4px;">
-        El reporte suma todos los cortes registrados desde esa recepción hasta la siguiente recepción (o hasta hoy, si es la última).
+        Muestra los cortes que se obtuvieron exactamente de esa recepción.
       </p>
     ` : `
       <div class="field">
@@ -867,73 +1339,88 @@ function renderReporteModal(){
 function generarReportePDF(){
   const producto = state.tab;
   const label = producto === 'vacuno' ? 'Vacuno' : 'Pollo';
-  const movs = state.movimientos[producto] || [];
 
-  let entradaRef = null;
-  let windowStart, windowEnd, periodoLabel;
-
-  if (reporteModo === 'recepcion'){
-    const id = document.getElementById('fReporteEntrada').value;
+  if (reporteModo === 'recepcion') {
+    const id = document.getElementById('fReporteRecepcion').value;
     if (!id){ showToast('Elegí una recepción'); return; }
-    entradaRef = movs.find(m => m.id === id);
-    if (!entradaRef){ showToast('No se encontró la recepción'); return; }
+    const recepcion = (state.recepciones[producto] || []).find(r => r.id === id);
+    if (!recepcion){ showToast('No se encontró la recepción'); return; }
 
-    const entradasOrdenadas = movs.filter(m => m.tipo === 'entrada').sort((a,b) => tsMillis(a) - tsMillis(b));
-    const start = tsMillis(entradaRef);
-    const siguiente = entradasOrdenadas.find(e => tsMillis(e) > start);
-    windowStart = start;
-    windowEnd = siguiente ? tsMillis(siguiente) : Date.now() + 1;
-    periodoLabel = `${fechaBonita(entradaRef.fecha)} — ${siguiente ? fechaBonita(siguiente.fecha) : 'hoy'}`;
+    const despiezosLote = (state.despieces[producto] || []).filter(d => d.recepcionId === id);
+    const porCorte = {};
+    despiezosLote.forEach(d => (d.cortes || []).forEach(c => {
+      porCorte[c.corte] = (porCorte[c.corte] || 0) + Number(c.kg || 0);
+    }));
+    const totalDespiezado = Object.values(porCorte).reduce((s,v) => s+v, 0);
+
+    buildReportePDF({
+      label,
+      titulo: 'Reporte de recepción',
+      meta: [
+        `Materia prima: ${recepcion.materiaPrima}`,
+        `Fecha de recepción: ${fechaBonita(recepcion.fecha)}${recepcion.nota ? ' — ' + recepcion.nota : ''}`,
+        `Kg recibido: ${fmt(recepcion.kg)} kg`,
+        `Kg despiezado: ${fmt(totalDespiezado)} kg`,
+        `Kg sin procesar: ${fmt(recepcion.kg - totalDespiezado)} kg`,
+        `Emitido el: ${new Date().toLocaleString('es-PY')}`
+      ],
+      tablaTitulo: 'Kilos obtenidos por corte',
+      tablaHead: ['Corte', 'Kg obtenido'],
+      tablaRows: Object.entries(porCorte).map(([c,kg]) => [c, fmt(kg) + ' kg']),
+      archivo: `reporte-recepcion-${producto}-${recepcion.fecha}.pdf`
+    });
   } else {
     const desde = document.getElementById('fReporteDesde').value;
     const hasta = document.getElementById('fReporteHasta').value;
     if (!desde || !hasta){ showToast('Completá ambas fechas'); return; }
-    windowStart = new Date(desde + 'T00:00:00').getTime();
-    windowEnd = new Date(hasta + 'T23:59:59').getTime();
-    periodoLabel = `${fechaBonita(desde)} — ${fechaBonita(hasta)}`;
+    const start = new Date(desde + 'T00:00:00').getTime();
+    const end = new Date(hasta + 'T23:59:59').getTime();
+
+    const recepciones = (state.recepciones[producto] || []).filter(r => tsMillis(r) >= start && tsMillis(r) <= end);
+    const despiezos = (state.despieces[producto] || []).filter(d => tsMillis(d) >= start && tsMillis(d) <= end);
+    const remitos = (state.remitos[producto] || []).filter(r => tsMillis(r) >= start && tsMillis(r) <= end);
+
+    const totalRecibido = recepciones.reduce((s,r) => s + Number(r.kg||0), 0);
+    const porCorteDespiezado = {};
+    despiezos.forEach(d => (d.cortes||[]).forEach(c => { porCorteDespiezado[c.corte] = (porCorteDespiezado[c.corte]||0) + Number(c.kg||0); }));
+    const totalDespiezado = Object.values(porCorteDespiezado).reduce((s,v)=>s+v,0);
+
+    const porDestino = {};
+    remitos.forEach(r => (r.cortes||[]).forEach(c => {
+      const key = r.destino + '||' + c.corte;
+      porDestino[key] = (porDestino[key]||0) + Number(c.kg||0);
+    }));
+    const totalEnviado = remitos.reduce((s,r) => s + (r.cortes||[]).reduce((s2,c)=>s2+Number(c.kg||0),0), 0);
+
+    buildReportePDF({
+      label,
+      titulo: 'Reporte por rango de fechas',
+      meta: [
+        `Período: ${fechaBonita(desde)} — ${fechaBonita(hasta)}`,
+        `Total recibido (materia prima): ${fmt(totalRecibido)} kg`,
+        `Total despiezado: ${fmt(totalDespiezado)} kg`,
+        `Total enviado a sucursales: ${fmt(totalEnviado)} kg`,
+        `Emitido el: ${new Date().toLocaleString('es-PY')}`
+      ],
+      tablaTitulo: 'Kilos despiezados por corte',
+      tablaHead: ['Corte', 'Kg despiezado'],
+      tablaRows: Object.entries(porCorteDespiezado).map(([c,kg]) => [c, fmt(kg) + ' kg']),
+      tabla2Titulo: 'Envíos por destino y corte',
+      tabla2Head: ['Destino', 'Corte', 'Kg'],
+      tabla2Rows: Object.entries(porDestino).map(([key,kg]) => { const [destino,corte] = key.split('||'); return [destino, corte, fmt(kg) + ' kg']; }),
+      archivo: `reporte-rango-${producto}-${desde}-a-${hasta}.pdf`
+    });
   }
-
-  const salidasEnVentana = movs.filter(m => m.tipo === 'salida' && tsMillis(m) >= windowStart && tsMillis(m) < windowEnd);
-  const entradasEnVentana = movs.filter(m => m.tipo === 'entrada' && tsMillis(m) >= windowStart && tsMillis(m) < windowEnd);
-
-  if (!salidasEnVentana.length && !entradaRef && !entradasEnVentana.length){
-    showToast('No hay movimientos en ese período');
-    return;
-  }
-
-  // Totales por corte
-  const porCorte = {};
-  // Detalle por corte + destino
-  const porCorteDestino = {};
-  salidasEnVentana.forEach(m => {
-    const c = m.corte || 'Sin especificar';
-    const d = m.destino || 'Sin especificar';
-    porCorte[c] = (porCorte[c] || 0) + Number(m.kg || 0);
-    const key = c + '||' + d;
-    porCorteDestino[key] = (porCorteDestino[key] || 0) + Number(m.kg || 0);
-  });
-
-  const totalUsado = salidasEnVentana.reduce((s,m) => s + Number(m.kg || 0), 0);
-  const kgInicial = entradaRef ? Number(entradaRef.kg || 0) : entradasEnVentana.reduce((s,m) => s + Number(m.kg||0), 0);
-  const kgRestante = kgInicial - totalUsado;
-
-  buildPDF({
-    label, entradaRef, periodoLabel, kgInicial, totalUsado, kgRestante,
-    porCorte, porCorteDestino, salidasEnVentana
-  });
 }
 
-function buildPDF(data){
+function buildReportePDF(data){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  const { label, entradaRef, periodoLabel, kgInicial, totalUsado, kgRestante, porCorte, porCorteDestino } = data;
-
   const burgundy = [122, 46, 46];
   const mustard = [201, 154, 60];
   const ink = [36, 27, 23];
-  const accent = label === 'Vacuno' ? burgundy : mustard;
+  const accent = data.label === 'Vacuno' ? burgundy : mustard;
 
-  // Encabezado
   doc.setFillColor(...ink);
   doc.rect(0, 0, 210, 28, 'F');
   doc.setTextColor(255,255,255);
@@ -942,75 +1429,114 @@ function buildPDF(data){
   doc.text('Control de Productos Cárnicos y Pollos', 14, 13);
   doc.setFontSize(10);
   doc.setFont('helvetica','normal');
-  doc.text(`Reporte de consumo · ${label}`, 14, 20);
+  doc.text(`${data.titulo} · ${data.label}`, 14, 20);
 
   doc.setTextColor(...ink);
   let y = 38;
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(11);
-  doc.text('Datos del reporte', 14, y);
-  y += 7;
   doc.setFont('helvetica','normal');
   doc.setFontSize(10);
-
-  const lineas = [];
-  if (entradaRef){
-    lineas.push(`Recepción de referencia: ${fechaBonita(entradaRef.fecha)} — ${fmt(entradaRef.kg)} kg${entradaRef.nota ? ' (' + entradaRef.nota + ')' : ''}`);
-  }
-  lineas.push(`Período considerado: ${periodoLabel}`);
-  lineas.push(`Kg inicial: ${fmt(kgInicial)} kg`);
-  lineas.push(`Kg total usado en cortes: ${fmt(totalUsado)} kg`);
-  lineas.push(`Kg restante estimado: ${fmt(kgRestante)} kg`);
-  lineas.push(`Emitido el: ${new Date().toLocaleString('es-PY')}`);
-
-  lineas.forEach(l => { doc.text(l, 14, y); y += 6; });
+  data.meta.forEach(l => { doc.text(l, 14, y); y += 6; });
   y += 4;
 
-  // Tabla: totales por corte
   doc.setFont('helvetica','bold');
   doc.setFontSize(11);
-  doc.text('Kilos finales por corte', 14, y);
-  y += 3;
+  doc.text(data.tablaTitulo, 14, y);
 
-  const corteRows = Object.entries(porCorte).map(([corte, kg]) => [corte, fmt(kg) + ' kg']);
   doc.autoTable({
     startY: y + 3,
-    head: [['Corte', 'Kg total']],
-    body: corteRows.length ? corteRows : [['Sin cortes registrados en el período', '-']],
+    head: [data.tablaHead],
+    body: data.tablaRows.length ? data.tablaRows : [['Sin datos en el período', '-']],
     headStyles: { fillColor: accent, textColor: 255 },
     styles: { fontSize: 10 },
     margin: { left: 14, right: 14 }
   });
 
-  // Tabla: detalle por corte + destino
-  let y2 = doc.lastAutoTable.finalY + 10;
+  let finalY = doc.lastAutoTable.finalY + 10;
+
+  if (data.tabla2Titulo) {
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    doc.text(data.tabla2Titulo, 14, finalY);
+    doc.autoTable({
+      startY: finalY + 3,
+      head: [data.tabla2Head],
+      body: data.tabla2Rows.length ? data.tabla2Rows : [['-', '-', '-']],
+      headStyles: { fillColor: ink, textColor: 255 },
+      styles: { fontSize: 9.5 },
+      margin: { left: 14, right: 14 }
+    });
+    finalY = doc.lastAutoTable.finalY + 10;
+  }
+
+  doc.setFontSize(8.5);
+  doc.setTextColor(140,130,120);
+  doc.text('Documento generado automáticamente por la app de Control de Productos Cárnicos y Pollos — VitaPan.', 14, finalY + 4);
+
+  doc.save(data.archivo);
+  closeModal();
+  showToast('Reporte generado');
+}
+
+function buildRemitoPDF(remito){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const label = remito.producto === 'vacuno' ? 'Vacuno' : 'Pollo';
+  const burgundy = [122, 46, 46];
+  const mustard = [201, 154, 60];
+  const ink = [36, 27, 23];
+  const accent = label === 'Vacuno' ? burgundy : mustard;
+
+  doc.setFillColor(...ink);
+  doc.rect(0, 0, 210, 30, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(16);
+  doc.text('REMITO DE ENVÍO', 14, 14);
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text('Control de Productos Cárnicos y Pollos — VitaPan', 14, 21);
+
+  doc.setTextColor(...ink);
+  let y = 40;
   doc.setFont('helvetica','bold');
   doc.setFontSize(11);
-  doc.text('Detalle por corte y destino', 14, y2);
+  doc.text('Datos del envío', 14, y);
+  y += 7;
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(10.5);
+  doc.text(`Producto: ${label}`, 14, y); y += 6;
+  doc.text(`Destino: ${remito.destino}`, 14, y); y += 6;
+  doc.text(`Fecha: ${fechaBonita(remito.fecha)}`, 14, y); y += 6;
+  if (remito.nota) { doc.text(`Nota: ${remito.nota}`, 14, y); y += 6; }
+  y += 4;
 
-  const detalleRows = Object.entries(porCorteDestino).map(([key, kg]) => {
-    const [corte, destino] = key.split('||');
-    return [corte, destino, fmt(kg) + ' kg'];
-  });
+  const rows = (remito.cortes || []).map(c => [c.corte, fmt(c.kg) + ' kg']);
+  const total = (remito.cortes || []).reduce((s,c) => s + Number(c.kg||0), 0);
 
   doc.autoTable({
-    startY: y2 + 3,
-    head: [['Corte', 'Destino', 'Kg']],
-    body: detalleRows.length ? detalleRows : [['-', '-', '-']],
-    headStyles: { fillColor: ink, textColor: 255 },
-    styles: { fontSize: 9.5 },
+    startY: y,
+    head: [['Corte', 'Kilos']],
+    body: rows.length ? rows : [['-', '-']],
+    foot: [['TOTAL', fmt(total) + ' kg']],
+    headStyles: { fillColor: accent, textColor: 255 },
+    footStyles: { fillColor: ink, textColor: 255, fontStyle: 'bold' },
+    styles: { fontSize: 11 },
     margin: { left: 14, right: 14 }
   });
 
-  const finalY = doc.lastAutoTable.finalY + 12;
+  const finalY = doc.lastAutoTable.finalY + 26;
+  doc.setDrawColor(200,200,200);
+  doc.line(14, finalY, 84, finalY);
+  doc.line(126, finalY, 196, finalY);
+  doc.setFontSize(9);
+  doc.text('Firma entrega', 14, finalY + 5);
+  doc.text('Firma recibe conforme', 126, finalY + 5);
+
   doc.setFontSize(8.5);
   doc.setTextColor(140,130,120);
-  doc.text('Documento generado automáticamente por la app de Control de Productos Cárnicos y Pollos — VitaPan.', 14, finalY);
+  doc.text(`Generado el ${new Date().toLocaleString('es-PY')}`, 14, 285);
 
-  const fechaArchivo = fechaHoy();
-  doc.save(`reporte-${data.label.toLowerCase()}-${fechaArchivo}.pdf`);
-  closeModal();
-  showToast('Reporte generado');
+  doc.save(`remito-${remito.destino.replace(/\s+/g,'-').toLowerCase()}-${remito.fecha}.pdf`);
 }
 
 /* =========================================================
@@ -1026,12 +1552,39 @@ function showToast(msg){
 }
 
 /* =========================================================
-   8) PWA: registrar service worker
+   8) PWA: registrar service worker + botón de instalar
 ========================================================= */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(console.error);
+    navigator.serviceWorker.register('service-worker.js').then((reg) => {
+      reg.update();
+    }).catch(console.error);
   });
+}
+
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('installBtn').style.display = 'inline-block';
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  document.getElementById('installBtn').style.display = 'none';
+  showToast('App instalada');
+});
+
+async function triggerInstall(){
+  if (!deferredInstallPrompt){
+    showToast('Usá el menú ⋮ del navegador → "Instalar app"');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById('installBtn').style.display = 'none';
 }
 
 /* =========================================================
