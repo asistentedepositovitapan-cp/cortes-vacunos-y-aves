@@ -21,6 +21,7 @@
     --mustard:#C99A3C;
     --mustard-dark:#A17B27;
     --info:#3E6B7A;
+    --season:#8A5A2E;
     --line:#DCD3C4;
     --muted:#8A7F73;
     --good:#3E7A52;
@@ -186,6 +187,7 @@
   }
   .btn-entrada{ background:var(--good); color:#fff; }
   .btn-despiece{ background:var(--info); color:#fff; }
+  .btn-condimento{ background:var(--season); color:#fff; }
   .btn-salida{ background:var(--burgundy); color:#fff; }
   .tabpanel.pollo .btn-salida{ background:var(--mustard-dark); }
   .btn-reporte{ background:rgba(250,247,242,0.12); color:var(--paper); border:1px solid rgba(250,247,242,0.25); }
@@ -290,6 +292,7 @@
   }
   .tag.recepcion{ background:rgba(62,122,82,0.15); color:var(--good); }
   .tag.despiece{ background:rgba(62,107,122,0.15); color:var(--info); }
+  .tag.condimento{ background:rgba(138,90,46,0.15); color:var(--season); }
   .tag.remito{ background:rgba(122,46,46,0.12); color:var(--burgundy); }
   .tabpanel.pollo .tag.remito{ background:rgba(201,154,60,0.18); color:var(--mustard-dark); }
   .ticket .kg{
@@ -502,11 +505,13 @@ if (isConfigured) {
 /* =========================================================
    2) ESTADO Y VALORES POR DEFECTO
 
-   MODELO DE DATOS (3 pasos):
-   1. "recepciones"  -> materia prima cruda que entra (ej: 21.4 kg de Lomo)
-   2. "despieces"    -> de una recepción, cuántos kg de cada corte final se
-                        obtuvieron (ej: de ese Lomo salieron 9kg Milanesa + 6kg Sandwich)
-   3. "remitos"      -> envío de cortes ya separados a una sucursal/destino
+   MODELO DE DATOS (4 pasos):
+   1. "recepciones"     -> materia prima cruda que entra (ej: 21.4 kg de Lomo)
+   2. "despieces"       -> de una recepción, cuántos kg de cada corte final se
+                           obtuvieron, en crudo (ej: 9kg Milanesa + 6kg Sandwich)
+   3. "condimentaciones"-> se toma un corte crudo y se condimenta; el peso final
+                           es mayor. La diferencia = kg de condimento usado.
+   4. "remitos"         -> envío de cortes (crudos o condimentados) a un destino
 ========================================================= */
 const DEFAULT_MATERIAS_PRIMAS = {
   vacuno: ["Lomo", "Carnaza", "Vacío", "Matambre"],
@@ -527,8 +532,9 @@ let state = {
   destinos: [],
   recepciones: { vacuno: [], pollo: [] },
   despieces: { vacuno: [], pollo: [] },
+  condimentaciones: { vacuno: [], pollo: [] },
   remitos: { vacuno: [], pollo: [] },
-  historialFiltro: 'todos' // 'todos' | 'recepcion' | 'despiece' | 'remito'
+  historialFiltro: 'todos' // 'todos' | 'recepcion' | 'despiece' | 'condimento' | 'remito'
 };
 
 /* =========================================================
@@ -593,6 +599,17 @@ function initFirestore(){
     renderAll();
   }, (err) => { console.error(err); showToast('Error al leer despieces: ' + err.message); });
 
+  db.collection('condimentaciones').orderBy('timestamp', 'desc').onSnapshot((snap) => {
+    const vacuno = [], pollo = [];
+    snap.forEach((doc) => {
+      const c = { id: doc.id, ...doc.data() };
+      (c.producto === 'pollo' ? pollo : vacuno).push(c);
+    });
+    state.condimentaciones.vacuno = vacuno;
+    state.condimentaciones.pollo = pollo;
+    renderAll();
+  }, (err) => { console.error(err); showToast('Error al leer condimentaciones: ' + err.message); });
+
   db.collection('remitos').orderBy('timestamp', 'desc').onSnapshot((snap) => {
     const vacuno = [], pollo = [];
     snap.forEach((doc) => {
@@ -632,16 +649,37 @@ function computeRawStock(producto){
 }
 
 function computeCorteStock(producto){
+  // Devuelve, por corte: { crudo, condimentado } disponibles.
   const despiezos = state.despieces[producto] || [];
+  const condimentaciones = state.condimentaciones[producto] || [];
   const remitos = state.remitos[producto] || [];
   const totals = {};
+  const get = (c) => (totals[c] = totals[c] || { crudo: 0, condimentado: 0 });
+
   despiezos.forEach(d => (d.cortes || []).forEach(c => {
-    totals[c.corte] = (totals[c.corte] || 0) + Number(c.kg || 0);
+    get(c.corte).crudo += Number(c.kg || 0);
   }));
+  condimentaciones.forEach(c => {
+    get(c.corte).crudo -= Number(c.kgSinCondimentar || 0);
+    get(c.corte).condimentado += Number(c.kgCondimentado || 0);
+  });
   remitos.forEach(r => (r.cortes || []).forEach(c => {
-    totals[c.corte] = (totals[c.corte] || 0) - Number(c.kg || 0);
+    const pool = c.pool === 'condimentado' ? 'condimentado' : 'crudo';
+    get(c.corte)[pool] -= Number(c.kg || 0);
   }));
   return totals;
+}
+
+function computeCondimentoUsado(producto, desdeMillis, hastaMillis){
+  const condimentaciones = state.condimentaciones[producto] || [];
+  const enRango = (desdeMillis == null) ? condimentaciones : condimentaciones.filter(c => {
+    const t = tsMillis(c);
+    return t >= desdeMillis && t <= hastaMillis;
+  });
+  const total = enRango.reduce((s,c) => s + Number(c.kgCondimento || 0), 0);
+  const porCorte = {};
+  enRango.forEach(c => { porCorte[c.corte] = (porCorte[c.corte] || 0) + Number(c.kgCondimento || 0); });
+  return { total, porCorte };
 }
 
 function fmt(n){
@@ -679,8 +717,9 @@ function renderAll(){
   const materiasPrimas = state.materiasPrimas[producto] || [];
 
   const corteStock = computeCorteStock(producto);
-  const totalCorteStock = Object.values(corteStock).reduce((s,v) => s+v, 0);
+  const totalCorteStock = Object.values(corteStock).reduce((s,v) => s + v.crudo + v.condimentado, 0);
   const corteKeys = Array.from(new Set([...cortes, ...Object.keys(corteStock)]));
+  const condimentoUsado = computeCondimentoUsado(producto);
 
   const { porMateriaPrima } = computeRawStock(producto);
   const mpKeys = Array.from(new Set([...materiasPrimas, ...Object.keys(porMateriaPrima)]));
@@ -689,25 +728,31 @@ function renderAll(){
   main.innerHTML = `
     <div class="tabpanel ${producto}">
       <div class="scale-panel ${producto}">
-        <p class="scale-label">Stock de cortes listos para despacho</p>
+        <p class="scale-label">Stock total de cortes (crudo + condimentado)</p>
         <div class="scale-readout">${fmt(totalCorteStock)}<small>kg</small></div>
 
         <div class="corte-stock-list">
-          ${corteKeys.length ? corteKeys.map(c => `
+          ${corteKeys.length ? corteKeys.map(c => {
+            const v = corteStock[c] || { crudo: 0, condimentado: 0 };
+            return `
             <div class="corte-stock-row">
               <span>${escapeHtml(c)}</span>
-              <span class="kg">${fmt(corteStock[c] || 0)} kg</span>
-            </div>
-          `).join('') : '<div class="corte-stock-row"><span>Todavía no hay cortes separados.</span></div>'}
+              <span class="kg">🔪 ${fmt(v.crudo)} kg &nbsp;·&nbsp; 🧂 ${fmt(v.condimentado)} kg</span>
+            </div>`;
+          }).join('') : '<div class="corte-stock-row"><span>Todavía no hay cortes separados.</span></div>'}
         </div>
+        <p style="position:relative;font-size:11px;color:rgba(250,247,242,0.55);margin:8px 0 0;">🔪 sin condimentar &nbsp;·&nbsp; 🧂 condimentado (listo para remitir) &nbsp;·&nbsp; Condimento usado en total: <b style="color:var(--paper)">${fmt(condimentoUsado.total)} kg</b></p>
 
         <div class="actions-row">
           <button class="btn btn-entrada" onclick="openRecepcionModal()">＋ Cargar recepción</button>
           <button class="btn btn-despiece" onclick="openDespieceModal()">🔪 Despiece</button>
         </div>
         <div class="actions-row">
+          <button class="btn btn-condimento" onclick="openCondimentoModal()">🧂 Condimentar</button>
           <button class="btn btn-salida" onclick="openRemitoModal()">🚚 Generar remito</button>
-          <button class="btn btn-reporte" onclick="openReporteModal()">📄 Reporte</button>
+        </div>
+        <div class="actions-row">
+          <button class="btn btn-reporte" onclick="openReporteModal()">📄 Generar reporte</button>
         </div>
       </div>
 
@@ -750,6 +795,7 @@ function renderAll(){
         <button class="filter-btn ${state.historialFiltro==='todos'?'active':''}" onclick="setHistorialFiltro('todos')">Todo</button>
         <button class="filter-btn ${state.historialFiltro==='recepcion'?'active':''}" onclick="setHistorialFiltro('recepcion')">Recepciones</button>
         <button class="filter-btn ${state.historialFiltro==='despiece'?'active':''}" onclick="setHistorialFiltro('despiece')">Despieces</button>
+        <button class="filter-btn ${state.historialFiltro==='condimento'?'active':''}" onclick="setHistorialFiltro('condimento')">Condimento</button>
         <button class="filter-btn ${state.historialFiltro==='remito'?'active':''}" onclick="setHistorialFiltro('remito')">Remitos</button>
       </div>
       ${renderHistorial(producto)}
@@ -766,6 +812,7 @@ function renderHistorial(producto){
   let items = [
     ...(state.recepciones[producto] || []).map(x => ({ ...x, _kind: 'recepcion' })),
     ...(state.despieces[producto] || []).map(x => ({ ...x, _kind: 'despiece' })),
+    ...(state.condimentaciones[producto] || []).map(x => ({ ...x, _kind: 'condimento' })),
     ...(state.remitos[producto] || []).map(x => ({ ...x, _kind: 'remito' }))
   ];
   if (state.historialFiltro !== 'todos') items = items.filter(i => i._kind === state.historialFiltro);
@@ -810,6 +857,25 @@ function renderTicket(item){
         </div>
       </div>`;
   }
+  if (item._kind === 'condimento') {
+    return `
+      <div class="ticket">
+        <div class="row1">
+          <span class="tag condimento">Condimentado</span>
+          <span class="kg">+${fmt(item.kgCondimento)} kg cond.</span>
+        </div>
+        <div class="meta"><span class="corte-name">${escapeHtml(item.corte || '')}</span></div>
+        <div class="lines">
+          <div class="line-item"><span>Peso sin condimentar</span><span>${fmt(item.kgSinCondimentar)} kg</span></div>
+          <div class="line-item"><span>Peso condimentado (final)</span><span>${fmt(item.kgCondimentado)} kg</span></div>
+          <div class="line-item"><span><b>Condimento usado</b></span><span><b>${fmt(item.kgCondimento)} kg</b></span></div>
+        </div>
+        <div class="meta">
+          <span>${fechaBonita(item.fecha)}${item.nota ? ' · ' + escapeHtml(item.nota) : ''}</span>
+          <button class="del" onclick="deleteDoc('condimentaciones','${item.id}')">Eliminar</button>
+        </div>
+      </div>`;
+  }
   // remito
   const total = (item.cortes || []).reduce((s,c) => s + Number(c.kg||0), 0);
   return `
@@ -820,7 +886,7 @@ function renderTicket(item){
       </div>
       <div class="meta"><span>Destino: <span class="corte-name">${escapeHtml(item.destino || '')}</span></span></div>
       <div class="lines">
-        ${(item.cortes || []).map(c => `<div class="line-item"><span>${escapeHtml(c.corte)}</span><span>${fmt(c.kg)} kg</span></div>`).join('')}
+        ${(item.cortes || []).map(c => `<div class="line-item"><span>${escapeHtml(c.corte)} <span style="color:var(--muted);font-size:11px;">(${c.pool === 'condimentado' ? '🧂 condimentado' : '🔪 crudo'})</span></span><span>${fmt(c.kg)} kg</span></div>`).join('')}
       </div>
       <div class="meta">
         <span>${fechaBonita(item.fecha)}${item.nota ? ' · ' + escapeHtml(item.nota) : ''}</span>
@@ -1018,7 +1084,105 @@ async function guardarDespiece(){
   }
 }
 
-/* ---- 6.3 Generar remito (cortes -> destino) ---- */
+/* ---- 6.3 Condimentar (corte crudo -> corte condimentado) ---- */
+function openCondimentoModal(){
+  const producto = state.tab;
+  const label = producto === 'vacuno' ? 'vacuno' : 'pollo';
+  const cortes = state.cortes[producto] || [];
+  const stock = computeCorteStock(producto);
+  const options = cortes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)} (${fmt((stock[c]||{}).crudo||0)} kg crudo disp.)</option>`).join('');
+
+  showModal(`
+    <h2>Condimentar corte · ${label}</h2>
+    <div class="field">
+      <label>Corte</label>
+      <select id="fCondCorte">
+        ${options || '<option value="">Sin cortes cargados</option>'}
+      </select>
+    </div>
+    <div class="field">
+      <label>Peso sin condimentar (kg que tomás del stock crudo)</label>
+      <input type="number" id="fCondKgCrudo" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 10.0" autofocus>
+    </div>
+    <div class="field">
+      <label>Peso condimentado (kg final, ya con el condimento puesto)</label>
+      <input type="number" id="fCondKgFinal" inputmode="decimal" step="0.01" min="0" placeholder="Ej: 10.6">
+    </div>
+    <p id="condPreview" style="font-size:13px;color:var(--muted);margin-top:-6px;">Condimento usado: — kg</p>
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="fCondFecha" value="${fechaHoy()}">
+    </div>
+    <div class="field">
+      <label>Nota — opcional</label>
+      <input type="text" id="fCondNota" placeholder="Ej: Tanda de la tarde">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" style="background:var(--season)" onclick="guardarCondimento()">Guardar</button>
+    </div>
+  `);
+
+  const updatePreview = () => {
+    const crudo = parseFloat(document.getElementById('fCondKgCrudo').value);
+    const final = parseFloat(document.getElementById('fCondKgFinal').value);
+    const preview = document.getElementById('condPreview');
+    if (!isNaN(crudo) && !isNaN(final)) {
+      const diff = final - crudo;
+      preview.textContent = `Condimento usado: ${fmt(diff)} kg`;
+      preview.style.color = diff < 0 ? 'var(--bad)' : 'var(--muted)';
+    } else {
+      preview.textContent = 'Condimento usado: — kg';
+      preview.style.color = 'var(--muted)';
+    }
+  };
+  document.getElementById('fCondKgCrudo').addEventListener('input', updatePreview);
+  document.getElementById('fCondKgFinal').addEventListener('input', updatePreview);
+}
+
+async function guardarCondimento(){
+  const producto = state.tab;
+  const corte = document.getElementById('fCondCorte').value;
+  const kgSinCondimentar = parseFloat(document.getElementById('fCondKgCrudo').value);
+  const kgCondimentado = parseFloat(document.getElementById('fCondKgFinal').value);
+  const fecha = document.getElementById('fCondFecha').value || fechaHoy();
+  const nota = document.getElementById('fCondNota').value.trim();
+
+  if (!corte){ showToast('Elegí un corte'); return; }
+  if (!kgSinCondimentar || kgSinCondimentar <= 0){ showToast('Ingresá el peso sin condimentar'); return; }
+  if (!kgCondimentado || kgCondimentado <= 0){ showToast('Ingresá el peso condimentado final'); return; }
+  if (kgCondimentado < kgSinCondimentar){
+    if (!confirm('El peso condimentado es menor al peso sin condimentar. ¿Confirmás igual?')) return;
+  }
+
+  const stock = computeCorteStock(producto);
+  const disponibleCrudo = (stock[corte] || {}).crudo || 0;
+  if (kgSinCondimentar > disponibleCrudo + 0.001) {
+    if (!confirm(`Solo hay ${fmt(disponibleCrudo)} kg sin condimentar de ese corte. ¿Confirmás igual?`)) return;
+  }
+
+  const kgCondimento = kgCondimentado - kgSinCondimentar;
+
+  if (!db){ showToast('Falta configurar Firebase'); return; }
+  try {
+    await db.collection('condimentaciones').add({
+      producto,
+      corte,
+      kgSinCondimentar,
+      kgCondimentado,
+      kgCondimento,
+      fecha,
+      nota,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal();
+    showToast(`Condimentado — se usaron ${fmt(kgCondimento)} kg de condimento`);
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+/* ---- 6.4 Generar remito (cortes -> destino) ---- */
 let remitoLineCount = 0;
 
 function openRemitoModal(){
@@ -1060,14 +1224,19 @@ function addRemitoLine(){
   const producto = state.tab;
   const cortes = state.cortes[producto] || [];
   const stock = computeCorteStock(producto);
-  const options = cortes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)} (${fmt(stock[c]||0)} kg disp.)</option>`).join('');
+  const options = [];
+  cortes.forEach(c => {
+    const v = stock[c] || { crudo: 0, condimentado: 0 };
+    options.push(`<option value="${escapeHtml(c)}||condimentado">${escapeHtml(c)} — 🧂 condimentado (${fmt(v.condimentado)} kg disp.)</option>`);
+    options.push(`<option value="${escapeHtml(c)}||crudo">${escapeHtml(c)} — 🔪 crudo (${fmt(v.crudo)} kg disp.)</option>`);
+  });
   const idx = remitoLineCount++;
   const container = document.getElementById('remitoLines');
   const div = document.createElement('div');
   div.className = 'corte-line';
   div.id = 'remitoLine' + idx;
   div.innerHTML = `
-    <select id="remitoCorte${idx}">${options || '<option value="">Sin cortes</option>'}</select>
+    <select id="remitoCorte${idx}">${options.join('') || '<option value="">Sin cortes</option>'}</select>
     <input type="number" id="remitoKg${idx}" inputmode="decimal" step="0.01" min="0" placeholder="Kg">
     <button type="button" class="rm-line" onclick="removeLine('remitoLine${idx}')">✕</button>
   `;
@@ -1085,17 +1254,24 @@ async function guardarRemito(){
   for (const div of lineDivs) {
     const select = div.querySelector('select');
     const input = div.querySelector('input');
-    const corte = select.value;
+    const val = select.value;
     const kg = parseFloat(input.value);
-    if (!corte || !kg || kg <= 0) continue;
-    cortesArr.push({ corte, kg });
+    if (!val || !kg || kg <= 0) continue;
+    const [corte, pool] = val.split('||');
+    cortesArr.push({ corte, pool, kg });
   }
   if (!cortesArr.length){ showToast('Agregá al menos un corte con su kg'); return; }
 
   const stock = computeCorteStock(producto);
-  const excedidos = cortesArr.filter(c => c.kg > (stock[c.corte] || 0) + 0.001);
+  const excedidos = cortesArr.filter(c => {
+    const disponible = (stock[c.corte] || {})[c.pool] || 0;
+    return c.kg > disponible + 0.001;
+  });
   if (excedidos.length) {
-    const detalle = excedidos.map(c => `${c.corte} (disponible: ${fmt(stock[c.corte]||0)} kg)`).join(', ');
+    const detalle = excedidos.map(c => {
+      const disponible = (stock[c.corte] || {})[c.pool] || 0;
+      return `${c.corte} ${c.pool === 'condimentado' ? '🧂' : '🔪'} (disponible: ${fmt(disponible)} kg)`;
+    }).join(', ');
     if (!confirm(`Esto deja stock negativo en: ${detalle}. ¿Confirmás igual?`)) return;
   }
 
@@ -1378,6 +1554,7 @@ function generarReportePDF(){
 
     const recepciones = (state.recepciones[producto] || []).filter(r => tsMillis(r) >= start && tsMillis(r) <= end);
     const despiezos = (state.despieces[producto] || []).filter(d => tsMillis(d) >= start && tsMillis(d) <= end);
+    const condimentaciones = (state.condimentaciones[producto] || []).filter(c => tsMillis(c) >= start && tsMillis(c) <= end);
     const remitos = (state.remitos[producto] || []).filter(r => tsMillis(r) >= start && tsMillis(r) <= end);
 
     const totalRecibido = recepciones.reduce((s,r) => s + Number(r.kg||0), 0);
@@ -1385,9 +1562,13 @@ function generarReportePDF(){
     despiezos.forEach(d => (d.cortes||[]).forEach(c => { porCorteDespiezado[c.corte] = (porCorteDespiezado[c.corte]||0) + Number(c.kg||0); }));
     const totalDespiezado = Object.values(porCorteDespiezado).reduce((s,v)=>s+v,0);
 
+    const totalCondimento = condimentaciones.reduce((s,c) => s + Number(c.kgCondimento||0), 0);
+    const porCorteCondimento = {};
+    condimentaciones.forEach(c => { porCorteCondimento[c.corte] = (porCorteCondimento[c.corte]||0) + Number(c.kgCondimento||0); });
+
     const porDestino = {};
     remitos.forEach(r => (r.cortes||[]).forEach(c => {
-      const key = r.destino + '||' + c.corte;
+      const key = r.destino + '||' + c.corte + (c.pool === 'condimentado' ? ' (cond.)' : ' (crudo)');
       porDestino[key] = (porDestino[key]||0) + Number(c.kg||0);
     }));
     const totalEnviado = remitos.reduce((s,r) => s + (r.cortes||[]).reduce((s2,c)=>s2+Number(c.kg||0),0), 0);
@@ -1399,12 +1580,13 @@ function generarReportePDF(){
         `Período: ${fechaBonita(desde)} — ${fechaBonita(hasta)}`,
         `Total recibido (materia prima): ${fmt(totalRecibido)} kg`,
         `Total despiezado: ${fmt(totalDespiezado)} kg`,
+        `Total condimento usado: ${fmt(totalCondimento)} kg`,
         `Total enviado a sucursales: ${fmt(totalEnviado)} kg`,
         `Emitido el: ${new Date().toLocaleString('es-PY')}`
       ],
-      tablaTitulo: 'Kilos despiezados por corte',
-      tablaHead: ['Corte', 'Kg despiezado'],
-      tablaRows: Object.entries(porCorteDespiezado).map(([c,kg]) => [c, fmt(kg) + ' kg']),
+      tablaTitulo: 'Kilos despiezados y condimento usado por corte',
+      tablaHead: ['Corte', 'Kg despiezado', 'Kg condimento usado'],
+      tablaRows: Object.keys({ ...porCorteDespiezado, ...porCorteCondimento }).map(c => [c, fmt(porCorteDespiezado[c]||0) + ' kg', fmt(porCorteCondimento[c]||0) + ' kg']),
       tabla2Titulo: 'Envíos por destino y corte',
       tabla2Head: ['Destino', 'Corte', 'Kg'],
       tabla2Rows: Object.entries(porDestino).map(([key,kg]) => { const [destino,corte] = key.split('||'); return [destino, corte, fmt(kg) + ' kg']; }),
@@ -1510,7 +1692,7 @@ function buildRemitoPDF(remito){
   if (remito.nota) { doc.text(`Nota: ${remito.nota}`, 14, y); y += 6; }
   y += 4;
 
-  const rows = (remito.cortes || []).map(c => [c.corte, fmt(c.kg) + ' kg']);
+  const rows = (remito.cortes || []).map(c => [c.corte + (c.pool === 'condimentado' ? ' (condimentado)' : c.pool === 'crudo' ? ' (sin condimentar)' : ''), fmt(c.kg) + ' kg']);
   const total = (remito.cortes || []).reduce((s,c) => s + Number(c.kg||0), 0);
 
   doc.autoTable({
